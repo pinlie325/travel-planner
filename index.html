@@ -655,6 +655,42 @@ function bindOverlay(){
   });
   // settings
   document.getElementById('set-copy')?.addEventListener('click',()=>copyText(activePlan.code.replace('PLAN_','')));
+
+  // 匯出
+  document.getElementById('set-export')?.addEventListener('click',()=>{
+    const json=JSON.stringify(activePlan, null, 2);
+    const blob=new Blob([json],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=activePlan.name.replace(/\s+/g,'_')+'_行程.json';
+    a.click(); URL.revokeObjectURL(a.href);
+    toast('已下載 JSON 檔');
+  });
+
+  // 匯入
+  document.getElementById('set-import-btn')?.addEventListener('click',()=>{
+    const area=document.getElementById('import-area');
+    area.style.display=area.style.display==='none'?'block':'none';
+  });
+  document.getElementById('set-import-do')?.addEventListener('click',async()=>{
+    const raw=document.getElementById('import-json').value.trim();
+    const errEl=document.getElementById('import-err');
+    errEl.style.display='none';
+    let parsed;
+    try{ parsed=JSON.parse(raw); }
+    catch(e){ errEl.textContent='JSON 格式錯誤，請確認內容'; errEl.style.display='block'; return; }
+    // 驗證基本結構
+    if(!parsed.days||!Array.isArray(parsed.days)){
+      errEl.textContent='格式不符，缺少 days 欄位'; errEl.style.display='block'; return;
+    }
+    // 保留目前的 code，其餘覆蓋
+    parsed.code=activePlan.code;
+    activePlan=parsed;
+    addToIndex(parsed);
+    apiSave(activePlan);
+    closeOverlay(); render(); toast('匯入成功！');
+  });
+
   document.getElementById('set-delete')?.addEventListener('click',()=>{
     if(!confirm('從裝置移除此行程？\n（資料仍保留在雲端，可用代碼重新加入）')) return;
     removeFromIndex(activePlan.code.replace('PLAN_',''));
@@ -748,6 +784,21 @@ function settingsSheetHTML(){
   <div class="setting-row">
     <div><div class="setting-label">行程天數</div>
     <div class="setting-sub">共 ${activePlan.days.length} 天</div></div>
+  </div>
+  <div class="setting-row">
+    <div><div class="setting-label">匯出行程</div>
+    <div class="setting-sub">下載 JSON 檔，可備份或給 AI 整理</div></div>
+    <button class="act-btn ghost" id="set-export" style="width:auto;margin:0;padding:10px 18px;font-size:14px">📥 匯出</button>
+  </div>
+  <div class="setting-row">
+    <div><div class="setting-label">匯入行程</div>
+    <div class="setting-sub">貼上 AI 整理好的 JSON 覆蓋行程</div></div>
+    <button class="act-btn ghost" id="set-import-btn" style="width:auto;margin:0;padding:10px 18px;font-size:14px">📤 匯入</button>
+  </div>
+  <div id="import-area" style="display:none;margin-top:4px">
+    <textarea class="inp" id="import-json" rows="5" placeholder='貼上 JSON 內容...' style="font-size:13px;font-family:monospace"></textarea>
+    <div id="import-err" class="err-msg" style="display:none"></div>
+    <button class="act-btn primary" id="set-import-do" style="margin-top:4px">確認匯入</button>
   </div>
   <div style="margin-top:24px">
     <button class="act-btn danger" id="set-delete">從裝置移除此行程</button>
