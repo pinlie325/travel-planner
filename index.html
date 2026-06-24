@@ -195,46 +195,46 @@ var PACK = [
   {section:'其他',items:['環保袋','小錢包','墨鏡','帽子','換洗袋','行李秤','哨子（孩子用）']},
 ];
 
-// ─── API ───
-// 讀取用 JSONP 繞過 CORS
-function loadFromAPI() {
+// ─── API（全部用 JSONP GET 繞過 CORS）───
+function jsonp(params) {
   return new Promise(function(resolve, reject) {
-    var cbName = '_cb' + Date.now();
+    var cbName = '_cb' + Date.now() + Math.floor(Math.random()*9999);
     var script = document.createElement('script');
     var timer = setTimeout(function(){
       delete window[cbName];
       if(document.body.contains(script)) document.body.removeChild(script);
       reject(new Error('timeout'));
-    }, 10000);
+    }, 15000);
     window[cbName] = function(res) {
       clearTimeout(timer);
       delete window[cbName];
       if(document.body.contains(script)) document.body.removeChild(script);
       resolve(res);
     };
-    script.src = API_URL + '?callback=' + cbName;
+    var qs = 'callback=' + cbName;
+    Object.keys(params).forEach(function(k){
+      qs += '&' + k + '=' + encodeURIComponent(
+        typeof params[k] === 'object' ? JSON.stringify(params[k]) : params[k]
+      );
+    });
+    script.src = API_URL + '?' + qs;
     script.onerror = function(){ clearTimeout(timer); reject(new Error('script error')); };
     document.body.appendChild(script);
   });
 }
 
-// 寫入用 no-cors（不等回應，本地已更新）
 function api(action, payload) {
-  fetch(API_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: JSON.stringify(Object.assign({action: action}, payload))
-  });
-  return Promise.resolve({ok: true});
+  var params = Object.assign({ action: action }, payload);
+  return jsonp(params).catch(function(){ return { ok: true }; }); // 本地已更新，靜默失敗
 }
 
 window.onload = function() {
   renderDayNav();
   renderPacking();
-  loadFromAPI()
+  jsonp({ action: 'load' })
     .then(function(res){
       if(res.ok){ D=res.data; renderTimeline(); renderSpots(); renderBudget(); }
-      else toast('❌ 載入失敗');
+      else toast('❌ 載入失敗：' + (res.error||''));
     })
     .catch(function(e){ toast('❌ 網路錯誤：' + e.message); });
 };
