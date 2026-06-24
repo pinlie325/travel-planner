@@ -165,6 +165,14 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
 
   <!-- 景點 -->
   <div class="panel" id="panel-spots">
+    <div class="toolbar" style="margin-bottom:16px">
+      <div></div>
+      <div class="toolbar-actions">
+        <button class="btn" id="spotEditBtn" onclick="toggleSpotEdit()">✏️ 編輯</button>
+        <button class="btn primary" id="spotAddBtn" onclick="showSpotAdd()" style="display:none">＋ 新增</button>
+      </div>
+    </div>
+    <div id="spotAddFormWrap" style="display:none"></div>
     <div id="spotsContent"><div class="loading">載入中…</div></div>
   </div>
 
@@ -355,17 +363,115 @@ function submitAdd(){
 }
 
 // ─── Spots ───
+var spotEditMode = false;
+
+function toggleSpotEdit(){
+  spotEditMode=!spotEditMode;
+  document.getElementById("spotEditBtn").textContent=spotEditMode?"✅ 完成":"✏️ 編輯";
+  document.getElementById("spotAddBtn").style.display=spotEditMode?"":"none";
+  document.getElementById("spotAddFormWrap").style.display="none";
+  renderSpots();
+}
+
 function renderSpots(){
   var jb=D.spots.filter(function(s){return s.city==="JB"});
   var sg=D.spots.filter(function(s){return s.city==="SG"});
   var html="";
-  if(jb.length){html+='<div class="spot-section-label">柔佛巴魯 · Johor Bahru</div><div class="spot-grid">'+jb.map(spotCard).join("")+"</div>";}
-  if(sg.length){html+='<div class="spot-section-label">新加坡 · Singapore</div><div class="spot-grid">'+sg.map(spotCard).join("")+"</div>";}
-  document.getElementById("spotsContent").innerHTML=html||'<div class="empty">暫無景點</div>';
+  if(jb.length||spotEditMode){
+    html+='<div class="spot-section-label">柔佛巴魯 · Johor Bahru</div><div class="spot-grid">';
+    jb.forEach(function(s){ html+=spotCard(s); });
+    html+="</div>";
+  }
+  if(sg.length||spotEditMode){
+    html+='<div class="spot-section-label">新加坡 · Singapore</div><div class="spot-grid">';
+    sg.forEach(function(s){ html+=spotCard(s); });
+    html+="</div>";
+  }
+  if(!jb.length&&!sg.length) html='<div class="empty">暫無景點</div>';
+  document.getElementById("spotsContent").innerHTML=html;
 }
+
 function spotCard(s){
+  if(spotEditMode){
+    return '<div class="spot-card editing" style="flex-direction:column;align-items:stretch;gap:6px" id="scard-'+s.id+'">'
+      +'<div style="display:flex;gap:8px;align-items:center">'
+      +'<div class="spot-color" style="background:'+s.color+';flex-shrink:0"></div>'
+      +'<input id="sn-'+s.id+'" value="'+escHtml(s.name)+'" placeholder="景點名稱" style="flex:1;padding:4px 0;font-size:13px;border:none;border-bottom:1px solid #ddd;outline:none;background:transparent">'
+      +'</div>'
+      +'<input id="sl-'+s.id+'" value="'+escHtml(s.loc)+'" placeholder="地址/描述" style="padding:4px 0;font-size:12px;border:none;border-bottom:1px solid #eee;outline:none;background:transparent;color:#888">'
+      +'<div style="display:flex;gap:6px;align-items:center">'
+      +'<label style="font-size:11px;color:#aaa">城市</label>'
+      +'<select id="sc-'+s.id+'" style="font-size:12px;border:1px solid #e0e0e0;border-radius:6px;padding:3px 7px;background:#fff">'
+      +'<option value="JB"'+(s.city==="JB"?" selected":"")+'>JB 柔佛</option>'
+      +'<option value="SG"'+(s.city==="SG"?" selected":"")+'>SG 新加坡</option>'
+      +'</select>'
+      +'<label style="font-size:11px;color:#aaa;margin-left:6px">顏色</label>'
+      +'<input type="color" id="sk-'+s.id+'" value="'+s.color+'" style="width:28px;height:28px;border:none;border-radius:6px;padding:0;cursor:pointer;background:none">'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;margin-top:2px">'
+      +'<button class="btn sm primary" onclick="saveSpotItem('+s.id+')">儲存</button>'
+      +'<button class="btn sm danger" onclick="delSpotItem('+s.id+')">刪除</button>'
+      +'</div>'
+      +'</div>';
+  }
   return '<div class="spot-card"><div class="spot-color" style="background:'+s.color+'"></div>'
     +'<div><div class="spot-name">'+escHtml(s.name)+'</div><div class="spot-loc">'+escHtml(s.loc)+'</div></div></div>';
+}
+
+function saveSpotItem(id){
+  var idx=D.spots.findIndex(function(s){return String(s.id)===String(id)});
+  var updated={
+    id:id,
+    name:document.getElementById("sn-"+id).value,
+    loc: document.getElementById("sl-"+id).value,
+    city:document.getElementById("sc-"+id).value,
+    color:document.getElementById("sk-"+id).value,
+  };
+  D.spots[idx]=updated; renderSpots(); toast("儲存中…");
+  google.script.run.withSuccessHandler(function(){toast("✅ 已儲存")})
+    .withFailureHandler(function(){toast("❌ 儲存失敗")}).saveSpot(updated);
+}
+
+function delSpotItem(id){
+  if(!confirm("確定刪除？")) return;
+  D.spots=D.spots.filter(function(s){return String(s.id)!==String(id)});
+  renderSpots(); toast("刪除中…");
+  google.script.run.withSuccessHandler(function(){toast("✅ 已刪除")})
+    .withFailureHandler(function(){toast("❌ 刪除失敗")}).deleteSpot(id);
+}
+
+function showSpotAdd(){
+  document.getElementById("spotAddFormWrap").style.display="";
+  document.getElementById("spotAddFormWrap").innerHTML=
+    '<div class="add-form">'
+    +'<div class="add-form-title">新增景點</div>'
+    +'<div class="form-grid">'
+    +'<div class="fg full"><label>景點名稱</label><input id="sa-name" placeholder="例：魚尾獅公園"></div>'
+    +'<div class="fg full"><label>地址 / 描述</label><input id="sa-loc" placeholder="例：Marina Bay, Singapore"></div>'
+    +'<div class="fg"><label>城市</label><select id="sa-city"><option value="JB">JB 柔佛</option><option value="SG">SG 新加坡</option></select></div>'
+    +'<div class="fg"><label>顏色標記</label><input type="color" id="sa-color" value="#185FA5" style="width:100%;height:36px;border:1px solid #e0e0e0;border-radius:8px;padding:2px 4px;cursor:pointer"></div>'
+    +'</div>'
+    +'<div class="form-actions">'
+    +'<button class="btn primary" onclick="submitSpotAdd()">新增</button>'
+    +'<button class="btn" onclick="document.getElementById(\'spotAddFormWrap\').style.display=\'none\'">取消</button>'
+    +'</div></div>';
+}
+
+function submitSpotAdd(){
+  var name=document.getElementById("sa-name").value.trim();
+  if(!name){toast("請填寫景點名稱");return;}
+  var s={
+    id:Date.now(),
+    name:name,
+    loc: document.getElementById("sa-loc").value,
+    city:document.getElementById("sa-city").value,
+    color:document.getElementById("sa-color").value,
+  };
+  D.spots.push(s);
+  document.getElementById("spotAddFormWrap").style.display="none";
+  renderSpots(); toast("新增中…");
+  google.script.run.withSuccessHandler(function(){toast("✅ 已新增")})
+    .withFailureHandler(function(){toast("❌ 新增失敗")}).saveSpot(s);
 }
 
 // ─── Budget ───
