@@ -8,49 +8,37 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1a1a;font-size:15px;min-height:100vh}
 .container{max-width:800px;margin:0 auto;padding:32px 20px}
-
-/* header */
-.trip-header{margin-bottom:28px}
 .trip-title{font-size:26px;font-weight:500;margin-bottom:6px;letter-spacing:-.3px}
-.trip-meta{font-size:13px;color:#999}
+.trip-meta{font-size:13px;color:#999;margin-bottom:28px}
 .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;margin-left:6px;vertical-align:2px}
 .badge-jb{background:#d8f0e8;color:#065a37}
 .badge-sg{background:#dceeff;color:#0a3d7a}
-
-/* tabs */
-.tabs{display:flex;border-bottom:1px solid #e8e8e8;margin-bottom:28px;gap:0}
-.tab{padding:10px 22px;font-size:13px;cursor:pointer;border:none;background:none;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.01em;transition:color .15s}
+.tabs{display:flex;border-bottom:1px solid #e8e8e8;margin-bottom:28px}
+.tab{padding:10px 22px;font-size:13px;cursor:pointer;border:none;background:none;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s}
 .tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:500}
 .tab:hover:not(.active){color:#555}
 .panel{display:none}.panel.active{display:block}
-
-/* day nav */
 .toolbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:12px;flex-wrap:wrap}
 .day-nav{display:flex;gap:5px;flex-wrap:wrap;flex:1}
 .day-btn{padding:6px 13px;border-radius:20px;border:1px solid #ddd;background:#fff;font-size:12px;cursor:pointer;color:#777;transition:all .15s;white-space:nowrap}
 .day-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
 .day-btn:hover:not(.active){background:#f0f0f0}
 .toolbar-actions{display:flex;gap:7px;flex-shrink:0}
-
-/* buttons */
 .btn{padding:7px 15px;border-radius:8px;border:1px solid #ddd;background:#fff;font-size:13px;cursor:pointer;color:#1a1a1a;transition:all .15s;white-space:nowrap}
 .btn:hover{background:#f5f5f5}
 .btn.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
 .btn.primary:hover{background:#333}
-.btn.danger{color:#c0392b;border-color:#f5c6c6;background:#fff}
+.btn.danger{color:#c0392b;border-color:#f5c6c6}
 .btn.danger:hover{background:#fff5f5}
 .btn.sm{padding:4px 11px;font-size:12px;border-radius:7px}
-
-/* timeline */
-.timeline-header{font-size:12px;color:#bbb;margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.tl-header{font-size:12px;color:#bbb;margin-bottom:16px;display:flex;align-items:center;gap:6px}
 .tl-item{display:flex;gap:14px;margin-bottom:10px}
 .tl-time{width:44px;flex-shrink:0;font-size:12px;color:#bbb;padding-top:13px;text-align:right}
 .tl-line{width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
-.tl-dot{width:8px;height:8px;border-radius:50%;background:#ccc;margin-top:17px;flex-shrink:0;transition:background .2s}
-.tl-dot.teal{background:#0F6E56}.tl-dot.amber{background:#c07020}.tl-dot.purple{background:#534AB7}.tl-dot.blue{background:#185FA5}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:#ccc;margin-top:17px;flex-shrink:0}
+.tl-dot.teal{background:#0F6E56}.tl-dot.amber{background:#c07020}.tl-dot.purple{background:#534AB7}
 .tl-vline{width:1px;background:#ebebeb;flex:1;margin-top:2px}
-.tl-card{flex:1;background:#fff;border:1px solid #ebebeb;border-radius:12px;padding:12px 15px;transition:border-color .15s}
-.tl-card:hover{border-color:#ddd}
+.tl-card{flex:1;background:#fff;border:1px solid #ebebeb;border-radius:12px;padding:12px 15px}
 .tl-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-bottom:5px;font-weight:500}
 .tag-food{background:#fef0d8;color:#7a4a00}
 .tag-attraction{background:#d8f0e8;color:#065a37}
@@ -59,14 +47,10 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
 .tag-leisure{background:#fce9e4;color:#6b2810}
 .tl-name{font-size:14px;font-weight:500;margin-bottom:2px}
 .tl-note{font-size:12px;color:#aaa;line-height:1.5}
-
-/* editing */
 .tl-card.editing{border-color:#1a1a1a;background:#fafafa}
 .tl-card input,.tl-card select{width:100%;padding:5px 0;font-size:13px;border:none;border-bottom:1px solid #e0e0e0;background:transparent;outline:none;margin-bottom:5px;color:#1a1a1a;font-family:inherit}
 .tl-card input:focus,.tl-card select:focus{border-bottom-color:#1a1a1a}
-.tl-card .edit-actions{display:flex;gap:6px;margin-top:8px}
-
-/* add form */
+.edit-actions{display:flex;gap:6px;margin-top:8px}
 .add-form{background:#fff;border:1px solid #ddd;border-radius:12px;padding:18px;margin-bottom:14px}
 .add-form-title{font-size:13px;font-weight:500;margin-bottom:14px;color:#555}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
@@ -76,21 +60,15 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
 .fg input:focus,.fg select:focus{border-color:#1a1a1a}
 .fg.full{grid-column:1/-1}
 .form-actions{display:flex;gap:8px;margin-top:4px}
-
-/* empty state */
 .empty{padding:32px 0;text-align:center;color:#ccc;font-size:13px}
-
-/* spots */
 .spot-section-label{font-size:11px;font-weight:600;color:#bbb;letter-spacing:.1em;text-transform:uppercase;margin:20px 0 10px}
 .spot-section-label:first-child{margin-top:0}
 .spot-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.spot-card{background:#fff;border:1px solid #ebebeb;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s}
+.spot-card{background:#fff;border:1px solid #ebebeb;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;transition:border-color .15s}
 .spot-card:hover{border-color:#ccc}
 .spot-color{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .spot-name{font-size:13px;font-weight:500}
 .spot-loc{font-size:11px;color:#bbb}
-
-/* budget */
 .curr-toggle{display:flex;gap:5px;margin-bottom:18px}
 .curr-btn{padding:5px 15px;font-size:12px;border:1px solid #ddd;background:#fff;border-radius:20px;cursor:pointer;color:#888;transition:all .15s}
 .curr-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
@@ -108,8 +86,9 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
 .total-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:#f0f0ee;border-radius:10px;margin-top:10px}
 .total-label{font-size:14px;font-weight:500}
 .total-value{font-size:22px;font-weight:500}
-
-/* packing */
+.pack-progress-text{font-size:12px;color:#aaa;margin-bottom:8px}
+.pack-progress{height:4px;background:#ebebeb;border-radius:2px;margin-bottom:18px;overflow:hidden}
+.pack-progress-bar{height:100%;background:#0F6E56;border-radius:2px;transition:width .3s}
 .pack-section{margin-bottom:20px}
 .pack-section-title{font-size:13px;font-weight:500;margin-bottom:10px;color:#555}
 .pack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px}
@@ -118,19 +97,11 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
 .pack-item.checked{background:#f0f7f4;border-color:#9dd4be;color:#1a1a1a}
 .pack-check{width:16px;height:16px;border-radius:4px;border:1.5px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
 .pack-item.checked .pack-check{background:#0F6E56;border-color:#0F6E56;color:#fff}
-.pack-progress{height:4px;background:#ebebeb;border-radius:2px;margin-bottom:18px;overflow:hidden}
-.pack-progress-bar{height:100%;background:#0F6E56;border-radius:2px;transition:width .3s}
-.pack-progress-text{font-size:12px;color:#aaa;margin-bottom:8px}
-
-/* toast */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
 .loading{text-align:center;padding:48px 0;color:#ccc;font-size:13px}
 @media(max-width:540px){
-  .form-grid{grid-template-columns:1fr}
-  .spot-grid{grid-template-columns:1fr}
-  .summary-grid{grid-template-columns:1fr}
+  .form-grid,.spot-grid,.summary-grid{grid-template-columns:1fr}
   .pack-grid{grid-template-columns:1fr 1fr}
   .day-btn{font-size:11px;padding:5px 10px}
 }
@@ -138,10 +109,8 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
 </head>
 <body>
 <div class="container">
-  <div class="trip-header">
-    <div class="trip-title">柔佛 & 新加坡之旅 <span class="badge badge-jb">JB</span><span class="badge badge-sg">SG</span></div>
-    <div class="trip-meta">2025年6月25日 — 6月30日 &nbsp;·&nbsp; 6天5夜 &nbsp;·&nbsp; 親子旅行</div>
-  </div>
+  <div class="trip-title">柔佛 & 新加坡之旅 <span class="badge badge-jb">JB</span><span class="badge badge-sg">SG</span></div>
+  <div class="trip-meta">2025年6月25日 — 6月30日 &nbsp;·&nbsp; 6天5夜 &nbsp;·&nbsp; 親子旅行</div>
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('itinerary',this)">行程</button>
@@ -150,7 +119,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
     <button class="tab" onclick="switchTab('packing',this)">打包清單</button>
   </div>
 
-  <!-- 行程 -->
   <div class="panel active" id="panel-itinerary">
     <div class="toolbar">
       <div class="day-nav" id="dayNav"></div>
@@ -163,7 +131,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
     <div id="timeline"><div class="loading">載入中…</div></div>
   </div>
 
-  <!-- 景點 -->
   <div class="panel" id="panel-spots">
     <div class="toolbar" style="margin-bottom:16px">
       <div></div>
@@ -176,7 +143,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
     <div id="spotsContent"><div class="loading">載入中…</div></div>
   </div>
 
-  <!-- 規劃預算 -->
   <div class="panel" id="panel-budget">
     <div class="curr-toggle">
       <button class="curr-btn active" onclick="setCurr('TWD',this)">TWD</button>
@@ -191,7 +157,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
     <div class="total-bar"><div class="total-label">合計</div><div class="total-value" id="totalValue">—</div></div>
   </div>
 
-  <!-- 打包清單 -->
   <div class="panel" id="panel-packing">
     <div class="pack-progress-text" id="packText">0 / 0 項目已勾選</div>
     <div class="pack-progress"><div class="pack-progress-bar" id="packBar" style="width:0%"></div></div>
@@ -201,55 +166,69 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
 <div class="toast" id="toast"></div>
 
 <script>
+// ====== 填入你的 Apps Script 網址 ======
+var API_URL = 'https://script.google.com/macros/s/AKfycbwaM6U3gBk9N6K0QmlG76j6lf4vh7LBf3QvluR6pibxS89OlaPp-wIK4JVhE7uGZvpCwg/exec';
+
 var D = {events:[],spots:[],budget:[]};
 var editMode = false;
+var spotEditMode = false;
 var currentDay = 1;
-var curr = "TWD";
+var curr = 'TWD';
 var packState = {};
 
 var DAYS = [
-  {day:1,label:"Day 1",date:"6/25",city:"JB"},
-  {day:2,label:"Day 2",date:"6/26",city:"JB"},
-  {day:3,label:"Day 3",date:"6/27",city:"JB→SG"},
-  {day:4,label:"Day 4",date:"6/28",city:"SG"},
-  {day:5,label:"Day 5",date:"6/29",city:"SG"},
-  {day:6,label:"Day 6",date:"6/30",city:"SG"},
+  {day:1,label:'Day 1',date:'6/25',city:'JB'},
+  {day:2,label:'Day 2',date:'6/26',city:'JB'},
+  {day:3,label:'Day 3',date:'6/27',city:'JB→SG'},
+  {day:4,label:'Day 4',date:'6/28',city:'SG'},
+  {day:5,label:'Day 5',date:'6/29',city:'SG'},
+  {day:6,label:'Day 6',date:'6/30',city:'SG'},
 ];
-var TAG = {food:"美食",attraction:"景點",transport:"交通",hotel:"住宿",leisure:"休閒"};
-var DOT = {food:"amber",attraction:"teal",transport:"",hotel:"purple",leisure:""};
-
+var TAG = {food:'美食',attraction:'景點',transport:'交通',hotel:'住宿',leisure:'休閒'};
+var DOT = {food:'amber',attraction:'teal',transport:'',hotel:'purple',leisure:''};
 var PACK = [
-  {section:"證件",items:["護照","簽證確認信","機票列印","訂房確認單","保險證明","緊急聯絡卡"]},
-  {section:"衣物",items:["上衣 x6","短褲/裙 x4","內衣褲 x6","睡衣","泳衣","雨衣/薄外套","拖鞋","運動鞋"]},
-  {section:"盥洗",items:["牙刷牙膏","洗髮精","沐浴乳","防曬乳","保濕乳液","卸妝品","刮鬍刀","棉花棒"]},
-  {section:"3C",items:["手機充電線","充電器","行動電源","相機","記憶卡","轉接插頭","耳機"]},
-  {section:"藥品",items:["腸胃藥","感冒藥","退燒藥","止痛藥","OK繃","防蚊液","暈車藥"]},
-  {section:"其他",items:["環保袋","小錢包","墨鏡","帽子","換洗袋","行李秤","哨子（孩子用）"]},
+  {section:'證件',items:['護照','簽證確認信','機票列印','訂房確認單','保險證明','緊急聯絡卡']},
+  {section:'衣物',items:['上衣 x6','短褲/裙 x4','內衣褲 x6','睡衣','泳衣','雨衣/薄外套','拖鞋','運動鞋']},
+  {section:'盥洗',items:['牙刷牙膏','洗髮精','沐浴乳','防曬乳','保濕乳液','卸妝品','刮鬍刀','棉花棒']},
+  {section:'3C',items:['手機充電線','充電器','行動電源','相機','記憶卡','轉接插頭','耳機']},
+  {section:'藥品',items:['腸胃藥','感冒藥','退燒藥','止痛藥','OK繃','防蚊液','暈車藥']},
+  {section:'其他',items:['環保袋','小錢包','墨鏡','帽子','換洗袋','行李秤','哨子（孩子用）']},
 ];
+
+// ─── API ───
+function api(action, payload) {
+  return fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(Object.assign({action: action}, payload))
+  }).then(function(r){ return r.json(); });
+}
 
 window.onload = function() {
   renderDayNav();
   renderPacking();
-  google.script.run
-    .withSuccessHandler(function(data){ D=data; renderTimeline(); renderSpots(); renderBudget(); })
-    .withFailureHandler(function(e){ toast("❌ 載入失敗："+e.message); })
-    .getAllData();
+  fetch(API_URL)
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(res.ok){ D=res.data; renderTimeline(); renderSpots(); renderBudget(); }
+      else toast('❌ 載入失敗');
+    })
+    .catch(function(){ toast('❌ 網路錯誤'); });
 };
 
 function switchTab(name,btn){
-  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active")});
-  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active")});
-  btn.classList.add("active");
-  document.getElementById("panel-"+name).classList.add("active");
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+  btn.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
 }
 
 // ─── Day Nav ───
 function renderDayNav(){
-  var nav=document.getElementById("dayNav"); nav.innerHTML="";
+  var nav=document.getElementById('dayNav'); nav.innerHTML='';
   DAYS.forEach(function(d){
-    var b=document.createElement("button");
-    b.className="day-btn"+(d.day===currentDay?" active":"");
-    b.textContent=d.label+" ("+d.date+")";
+    var b=document.createElement('button');
+    b.className='day-btn'+(d.day===currentDay?' active':'');
+    b.textContent=d.label+' ('+d.date+')';
     b.onclick=function(){ currentDay=d.day; renderDayNav(); renderTimeline(); };
     nav.appendChild(b);
   });
@@ -260,26 +239,25 @@ function renderTimeline(){
   var d=DAYS.find(function(x){return x.day===currentDay});
   var events=D.events.filter(function(e){return Number(e.day)===currentDay})
     .sort(function(a,b){return String(a.time).localeCompare(String(b.time))});
-  var html='<div class="timeline-header">';
-  html+=d.label+" · "+d.date;
-  if(d.city.indexOf("JB")>-1) html+=' <span class="badge badge-jb">JB</span>';
-  if(d.city.indexOf("SG")>-1) html+=' <span class="badge badge-sg">SG</span>';
-  html+="</div>";
+  var html='<div class="tl-header">'+d.label+' · '+d.date;
+  if(d.city.indexOf('JB')>-1) html+=' <span class="badge badge-jb">JB</span>';
+  if(d.city.indexOf('SG')>-1) html+=' <span class="badge badge-sg">SG</span>';
+  html+='</div>';
   if(!events.length) html+='<div class="empty">這天還沒有行程，點「新增」加入</div>';
   events.forEach(function(ev,i){
-    var dc=DOT[ev.tag]||"";
+    var dc=DOT[ev.tag]||'';
     var last=(i===events.length-1);
     if(editMode){
       html+='<div class="tl-item"><div class="tl-time">'+ev.time+'</div>'
         +'<div class="tl-line"><div class="tl-dot '+dc+'"></div>'+(last?'':'<div class="tl-vline"></div>')+'</div>'
-        +'<div class="tl-card editing" id="card-'+ev.id+'">'
+        +'<div class="tl-card editing">'
         +'<div style="display:flex;gap:6px;margin-bottom:6px">'
         +'<input id="t-'+ev.id+'" value="'+ev.time+'" style="width:60px" placeholder="時間">'
         +'<select id="g-'+ev.id+'" style="flex:0 0 90px">'
-        +Object.keys(TAG).map(function(k){return'<option value="'+k+'"'+(ev.tag===k?" selected":"")+'>'+TAG[k]+'</option>'}).join("")
+        +Object.keys(TAG).map(function(k){return'<option value="'+k+'"'+(ev.tag===k?' selected':'')+'>'+TAG[k]+'</option>'}).join('')
         +'</select></div>'
-        +'<input id="n-'+ev.id+'" value="'+escHtml(ev.name)+'" placeholder="活動名稱">'
-        +'<input id="o-'+ev.id+'" value="'+escHtml(ev.note)+'" placeholder="備註說明">'
+        +'<input id="n-'+ev.id+'" value="'+esc(ev.name)+'" placeholder="活動名稱">'
+        +'<input id="o-'+ev.id+'" value="'+esc(ev.note)+'" placeholder="備註說明">'
         +'<div class="edit-actions">'
         +'<button class="btn sm primary" onclick="saveEv('+ev.id+')">儲存</button>'
         +'<button class="btn sm danger" onclick="delEv('+ev.id+')">刪除</button>'
@@ -289,19 +267,19 @@ function renderTimeline(){
         +'<div class="tl-line"><div class="tl-dot '+dc+'"></div>'+(last?'':'<div class="tl-vline"></div>')+'</div>'
         +'<div class="tl-card">'
         +'<div class="tl-tag tag-'+ev.tag+'">'+(TAG[ev.tag]||ev.tag)+'</div>'
-        +'<div class="tl-name">'+escHtml(ev.name)+'</div>'
-        +'<div class="tl-note">'+escHtml(ev.note)+'</div>'
+        +'<div class="tl-name">'+esc(ev.name)+'</div>'
+        +'<div class="tl-note">'+esc(ev.note)+'</div>'
         +'</div></div>';
     }
   });
-  document.getElementById("timeline").innerHTML=html;
+  document.getElementById('timeline').innerHTML=html;
 }
 
 function toggleEdit(){
   editMode=!editMode;
-  document.getElementById("editBtn").textContent=editMode?"✅ 完成":"✏️ 編輯";
-  document.getElementById("addBtn").style.display=editMode?"":"none";
-  document.getElementById("addFormWrap").style.display="none";
+  document.getElementById('editBtn').textContent=editMode?'✅ 完成':'✏️ 編輯';
+  document.getElementById('addBtn').style.display=editMode?'':'none';
+  document.getElementById('addFormWrap').style.display='none';
   renderTimeline();
 }
 
@@ -309,33 +287,31 @@ function saveEv(id){
   var idx=D.events.findIndex(function(e){return String(e.id)===String(id)});
   var ev=D.events[idx];
   var updated={id:id,day:ev.day,date:ev.date,city:ev.city,
-    time:document.getElementById("t-"+id).value,
-    name:document.getElementById("n-"+id).value,
-    note:document.getElementById("o-"+id).value,
-    tag: document.getElementById("g-"+id).value};
-  D.events[idx]=updated; renderTimeline(); toast("儲存中…");
-  google.script.run.withSuccessHandler(function(){toast("✅ 已儲存")})
-    .withFailureHandler(function(){toast("❌ 儲存失敗")}).saveEvent(updated);
+    time:document.getElementById('t-'+id).value,
+    name:document.getElementById('n-'+id).value,
+    note:document.getElementById('o-'+id).value,
+    tag: document.getElementById('g-'+id).value};
+  D.events[idx]=updated; renderTimeline(); toast('儲存中…');
+  api('saveEvent',{row:updated}).then(function(r){ toast(r.ok?'✅ 已儲存':'❌ 儲存失敗'); });
 }
 
 function delEv(id){
-  if(!confirm("確定刪除？")) return;
+  if(!confirm('確定刪除？')) return;
   D.events=D.events.filter(function(e){return String(e.id)!==String(id)});
-  renderTimeline(); toast("刪除中…");
-  google.script.run.withSuccessHandler(function(){toast("✅ 已刪除")})
-    .withFailureHandler(function(){toast("❌ 刪除失敗")}).deleteEvent(id);
+  renderTimeline(); toast('刪除中…');
+  api('deleteEvent',{id:id}).then(function(r){ toast(r.ok?'✅ 已刪除':'❌ 刪除失敗'); });
 }
 
 function showAdd(){
   var d=DAYS.find(function(x){return x.day===currentDay});
-  document.getElementById("addFormWrap").style.display="";
-  document.getElementById("addFormWrap").innerHTML=
+  document.getElementById('addFormWrap').style.display='';
+  document.getElementById('addFormWrap').innerHTML=
     '<div class="add-form">'
     +'<div class="add-form-title">新增行程 — '+d.label+' ('+d.date+')</div>'
     +'<div class="form-grid">'
     +'<div class="fg"><label>時間</label><input id="a-time" placeholder="09:00"></div>'
     +'<div class="fg"><label>類型</label><select id="a-tag">'
-    +Object.keys(TAG).map(function(k){return'<option value="'+k+'">'+TAG[k]+'</option>'}).join("")
+    +Object.keys(TAG).map(function(k){return'<option value="'+k+'">'+TAG[k]+'</option>'}).join('')
     +'</select></div>'
     +'<div class="fg full"><label>活動名稱</label><input id="a-name" placeholder="例：LEGOLAND Malaysia"></div>'
     +'<div class="fg full"><label>備註</label><input id="a-note" placeholder="補充說明（選填）"></div>'
@@ -348,103 +324,91 @@ function showAdd(){
 
 function submitAdd(){
   var d=DAYS.find(function(x){return x.day===currentDay});
-  var name=document.getElementById("a-name").value.trim();
-  if(!name){toast("請填寫活動名稱");return;}
+  var name=document.getElementById('a-name').value.trim();
+  if(!name){toast('請填寫活動名稱');return;}
   var ev={id:Date.now(),day:currentDay,date:d.date,city:d.city,
-    time:document.getElementById("a-time").value||"00:00",
-    name:name,
-    note:document.getElementById("a-note").value,
-    tag: document.getElementById("a-tag").value};
+    time:document.getElementById('a-time').value||'00:00',
+    name:name, note:document.getElementById('a-note').value,
+    tag: document.getElementById('a-tag').value};
   D.events.push(ev);
-  document.getElementById("addFormWrap").style.display="none";
-  renderTimeline(); toast("新增中…");
-  google.script.run.withSuccessHandler(function(){toast("✅ 已新增")})
-    .withFailureHandler(function(){toast("❌ 新增失敗")}).saveEvent(ev);
+  document.getElementById('addFormWrap').style.display='none';
+  renderTimeline(); toast('新增中…');
+  api('saveEvent',{row:ev}).then(function(r){ toast(r.ok?'✅ 已新增':'❌ 新增失敗'); });
 }
 
 // ─── Spots ───
-var spotEditMode = false;
-
 function toggleSpotEdit(){
   spotEditMode=!spotEditMode;
-  document.getElementById("spotEditBtn").textContent=spotEditMode?"✅ 完成":"✏️ 編輯";
-  document.getElementById("spotAddBtn").style.display=spotEditMode?"":"none";
-  document.getElementById("spotAddFormWrap").style.display="none";
+  document.getElementById('spotEditBtn').textContent=spotEditMode?'✅ 完成':'✏️ 編輯';
+  document.getElementById('spotAddBtn').style.display=spotEditMode?'':'none';
+  document.getElementById('spotAddFormWrap').style.display='none';
   renderSpots();
 }
 
 function renderSpots(){
-  var jb=D.spots.filter(function(s){return s.city==="JB"});
-  var sg=D.spots.filter(function(s){return s.city==="SG"});
-  var html="";
+  var jb=D.spots.filter(function(s){return s.city==='JB'});
+  var sg=D.spots.filter(function(s){return s.city==='SG'});
+  var html='';
   if(jb.length||spotEditMode){
     html+='<div class="spot-section-label">柔佛巴魯 · Johor Bahru</div><div class="spot-grid">';
-    jb.forEach(function(s){ html+=spotCard(s); });
-    html+="</div>";
+    jb.forEach(function(s){html+=spotCard(s);}); html+='</div>';
   }
   if(sg.length||spotEditMode){
     html+='<div class="spot-section-label">新加坡 · Singapore</div><div class="spot-grid">';
-    sg.forEach(function(s){ html+=spotCard(s); });
-    html+="</div>";
+    sg.forEach(function(s){html+=spotCard(s);}); html+='</div>';
   }
   if(!jb.length&&!sg.length) html='<div class="empty">暫無景點</div>';
-  document.getElementById("spotsContent").innerHTML=html;
+  document.getElementById('spotsContent').innerHTML=html;
 }
 
 function spotCard(s){
   if(spotEditMode){
-    return '<div class="spot-card editing" style="flex-direction:column;align-items:stretch;gap:6px" id="scard-'+s.id+'">'
+    return '<div class="spot-card" style="flex-direction:column;align-items:stretch;gap:6px">'
       +'<div style="display:flex;gap:8px;align-items:center">'
       +'<div class="spot-color" style="background:'+s.color+';flex-shrink:0"></div>'
-      +'<input id="sn-'+s.id+'" value="'+escHtml(s.name)+'" placeholder="景點名稱" style="flex:1;padding:4px 0;font-size:13px;border:none;border-bottom:1px solid #ddd;outline:none;background:transparent">'
+      +'<input id="sn-'+s.id+'" value="'+esc(s.name)+'" placeholder="景點名稱" style="flex:1;padding:4px 0;font-size:13px;border:none;border-bottom:1px solid #ddd;outline:none;background:transparent">'
       +'</div>'
-      +'<input id="sl-'+s.id+'" value="'+escHtml(s.loc)+'" placeholder="地址/描述" style="padding:4px 0;font-size:12px;border:none;border-bottom:1px solid #eee;outline:none;background:transparent;color:#888">'
-      +'<div style="display:flex;gap:6px;align-items:center">'
+      +'<input id="sl-'+s.id+'" value="'+esc(s.loc)+'" placeholder="地址/描述" style="padding:4px 0;font-size:12px;border:none;border-bottom:1px solid #eee;outline:none;background:transparent;color:#888">'
+      +'<div style="display:flex;gap:8px;align-items:center">'
       +'<label style="font-size:11px;color:#aaa">城市</label>'
-      +'<select id="sc-'+s.id+'" style="font-size:12px;border:1px solid #e0e0e0;border-radius:6px;padding:3px 7px;background:#fff">'
-      +'<option value="JB"'+(s.city==="JB"?" selected":"")+'>JB 柔佛</option>'
-      +'<option value="SG"'+(s.city==="SG"?" selected":"")+'>SG 新加坡</option>'
+      +'<select id="sc-'+s.id+'" style="font-size:12px;border:1px solid #e0e0e0;border-radius:6px;padding:3px 7px">'
+      +'<option value="JB"'+(s.city==='JB'?' selected':'')+'>JB 柔佛</option>'
+      +'<option value="SG"'+(s.city==='SG'?' selected':'')+'>SG 新加坡</option>'
       +'</select>'
       +'<label style="font-size:11px;color:#aaa;margin-left:6px">顏色</label>'
-      +'<input type="color" id="sk-'+s.id+'" value="'+s.color+'" style="width:28px;height:28px;border:none;border-radius:6px;padding:0;cursor:pointer;background:none">'
+      +'<input type="color" id="sk-'+s.id+'" value="'+s.color+'" style="width:28px;height:28px;border:none;border-radius:6px;padding:0;cursor:pointer">'
       +'</div>'
-      +'<div style="display:flex;gap:6px;margin-top:2px">'
+      +'<div style="display:flex;gap:6px">'
       +'<button class="btn sm primary" onclick="saveSpotItem('+s.id+')">儲存</button>'
       +'<button class="btn sm danger" onclick="delSpotItem('+s.id+')">刪除</button>'
-      +'</div>'
-      +'</div>';
+      +'</div></div>';
   }
   return '<div class="spot-card"><div class="spot-color" style="background:'+s.color+'"></div>'
-    +'<div><div class="spot-name">'+escHtml(s.name)+'</div><div class="spot-loc">'+escHtml(s.loc)+'</div></div></div>';
+    +'<div><div class="spot-name">'+esc(s.name)+'</div><div class="spot-loc">'+esc(s.loc)+'</div></div></div>';
 }
 
 function saveSpotItem(id){
   var idx=D.spots.findIndex(function(s){return String(s.id)===String(id)});
-  var updated={
-    id:id,
-    name:document.getElementById("sn-"+id).value,
-    loc: document.getElementById("sl-"+id).value,
-    city:document.getElementById("sc-"+id).value,
-    color:document.getElementById("sk-"+id).value,
-  };
-  D.spots[idx]=updated; renderSpots(); toast("儲存中…");
-  google.script.run.withSuccessHandler(function(){toast("✅ 已儲存")})
-    .withFailureHandler(function(){toast("❌ 儲存失敗")}).saveSpot(updated);
+  var updated={id:id,
+    name:document.getElementById('sn-'+id).value,
+    loc: document.getElementById('sl-'+id).value,
+    city:document.getElementById('sc-'+id).value,
+    color:document.getElementById('sk-'+id).value};
+  D.spots[idx]=updated; renderSpots(); toast('儲存中…');
+  api('saveSpot',{row:updated}).then(function(r){ toast(r.ok?'✅ 已儲存':'❌ 儲存失敗'); });
 }
 
 function delSpotItem(id){
-  if(!confirm("確定刪除？")) return;
+  if(!confirm('確定刪除？')) return;
   D.spots=D.spots.filter(function(s){return String(s.id)!==String(id)});
-  renderSpots(); toast("刪除中…");
-  google.script.run.withSuccessHandler(function(){toast("✅ 已刪除")})
-    .withFailureHandler(function(){toast("❌ 刪除失敗")}).deleteSpot(id);
+  renderSpots(); toast('刪除中…');
+  api('deleteSpot',{id:id}).then(function(r){ toast(r.ok?'✅ 已刪除':'❌ 刪除失敗'); });
 }
 
 function showSpotAdd(){
-  document.getElementById("spotAddFormWrap").style.display="";
-  document.getElementById("spotAddFormWrap").innerHTML=
-    '<div class="add-form">'
-    +'<div class="add-form-title">新增景點</div>'
+  document.getElementById('spotAddFormWrap').style.display='';
+  document.getElementById('spotAddFormWrap').innerHTML=
+    '<div class="add-form"><div class="add-form-title">新增景點</div>'
     +'<div class="form-grid">'
     +'<div class="fg full"><label>景點名稱</label><input id="sa-name" placeholder="例：魚尾獅公園"></div>'
     +'<div class="fg full"><label>地址 / 描述</label><input id="sa-loc" placeholder="例：Marina Bay, Singapore"></div>'
@@ -458,33 +422,29 @@ function showSpotAdd(){
 }
 
 function submitSpotAdd(){
-  var name=document.getElementById("sa-name").value.trim();
-  if(!name){toast("請填寫景點名稱");return;}
-  var s={
-    id:Date.now(),
-    name:name,
-    loc: document.getElementById("sa-loc").value,
-    city:document.getElementById("sa-city").value,
-    color:document.getElementById("sa-color").value,
-  };
+  var name=document.getElementById('sa-name').value.trim();
+  if(!name){toast('請填寫景點名稱');return;}
+  var s={id:Date.now(),name:name,
+    loc: document.getElementById('sa-loc').value,
+    city:document.getElementById('sa-city').value,
+    color:document.getElementById('sa-color').value};
   D.spots.push(s);
-  document.getElementById("spotAddFormWrap").style.display="none";
-  renderSpots(); toast("新增中…");
-  google.script.run.withSuccessHandler(function(){toast("✅ 已新增")})
-    .withFailureHandler(function(){toast("❌ 新增失敗")}).saveSpot(s);
+  document.getElementById('spotAddFormWrap').style.display='none';
+  renderSpots(); toast('新增中…');
+  api('saveSpot',{row:s}).then(function(r){ toast(r.ok?'✅ 已新增':'❌ 新增失敗'); });
 }
 
 // ─── Budget ───
 function renderBudget(){
-  var list=document.getElementById("budgetList");
+  var list=document.getElementById('budgetList');
   if(!D.budget.length){list.innerHTML='<div class="loading">載入中…</div>';return;}
   list.innerHTML=D.budget.map(function(b){
     return '<div class="budget-item">'
-      +'<div class="budget-left"><span class="budget-emoji">'+b.icon+'</span><span>'+escHtml(b.name)+'</span></div>'
+      +'<div class="budget-left"><span class="budget-emoji">'+b.icon+'</span><span>'+esc(b.name)+'</span></div>'
       +'<input class="budget-input" type="number" value="'+b.twd+'" data-key="'+b.key+'"'
       +' onchange="updateBudget(\''+b.key+'\',this.value)">'
       +'</div>';
-  }).join("");
+  }).join('');
   updateTotals();
 }
 
@@ -492,71 +452,67 @@ function updateBudget(key,val){
   var item=D.budget.find(function(b){return b.key===key});
   if(item) item.twd=parseFloat(val)||0;
   updateTotals();
-  google.script.run.withSuccessHandler(function(){toast("✅ 已儲存")})
-    .withFailureHandler(function(){toast("❌ 儲存失敗")}).saveBudget(item);
+  api('saveBudget',{row:item}).then(function(r){ toast(r.ok?'✅ 已儲存':'❌ 儲存失敗'); });
 }
 
 function updateTotals(){
   var total=D.budget.reduce(function(s,b){return s+(parseFloat(b.twd)||0)},0);
-  document.getElementById("budgetCount").textContent=D.budget.length+" 項";
-  document.getElementById("totalValue").textContent=fmt(total);
-  document.getElementById("budgetTotal").textContent=fmt(total);
+  document.getElementById('budgetCount').textContent=D.budget.length+' 項';
+  document.getElementById('totalValue').textContent=fmt(total);
+  document.getElementById('budgetTotal').textContent=fmt(total);
 }
 
 function setCurr(c,btn){
   curr=c;
-  document.querySelectorAll(".curr-btn").forEach(function(b){b.classList.remove("active")});
-  btn.classList.add("active");
+  document.querySelectorAll('.curr-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
   updateTotals();
-  // re-render inputs label only
 }
 
 function fmt(twd){
   twd=parseFloat(twd)||0;
-  if(curr==="TWD") return "NT$ "+Math.round(twd).toLocaleString();
-  if(curr==="MYR") return "RM "+Math.round(twd/7.1).toLocaleString();
-  if(curr==="SGD") return "S$ "+Math.round(twd/23.3).toLocaleString();
+  if(curr==='TWD') return 'NT$ '+Math.round(twd).toLocaleString();
+  if(curr==='MYR') return 'RM '+Math.round(twd/7.1).toLocaleString();
+  if(curr==='SGD') return 'S$ '+Math.round(twd/23.3).toLocaleString();
 }
 
 // ─── Packing ───
 function renderPacking(){
-  var html="";
+  var html='';
   PACK.forEach(function(sec){
     html+='<div class="pack-section"><div class="pack-section-title">'+sec.section+'</div><div class="pack-grid">';
     sec.items.forEach(function(item){
-      var k=sec.section+":"+item;
+      var k=sec.section+':'+item;
       var checked=!!packState[k];
-      html+='<div class="pack-item'+(checked?" checked":"")+'" onclick="togglePack(\''+k+'\',this)">'
-        +'<div class="pack-check">'+(checked?"✓":"")+'</div>'
-        +'<span>'+item+'</span></div>';
+      html+='<div class="pack-item'+(checked?' checked':'')+'" onclick="togglePack(\''+k+'\',this)">'
+        +'<div class="pack-check">'+(checked?'✓':'')+'</div><span>'+item+'</span></div>';
     });
-    html+="</div></div>";
+    html+='</div></div>';
   });
-  document.getElementById("packContent").innerHTML=html;
+  document.getElementById('packContent').innerHTML=html;
   updatePackProgress();
 }
 
 function togglePack(key,el){
   packState[key]=!packState[key];
-  el.classList.toggle("checked");
-  el.querySelector(".pack-check").textContent=packState[key]?"✓":"";
+  el.classList.toggle('checked');
+  el.querySelector('.pack-check').textContent=packState[key]?'✓':'';
   updatePackProgress();
 }
 
 function updatePackProgress(){
   var total=PACK.reduce(function(s,sec){return s+sec.items.length},0);
   var done=Object.values(packState).filter(Boolean).length;
-  document.getElementById("packText").textContent=done+" / "+total+" 項目已勾選";
-  document.getElementById("packBar").style.width=Math.round(done/total*100)+"%";
+  document.getElementById('packText').textContent=done+' / '+total+' 項目已勾選';
+  document.getElementById('packBar').style.width=Math.round(done/total*100)+'%';
 }
 
-// ─── Util ───
-function escHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function toast(msg){
-  var t=document.getElementById("toast");
-  t.textContent=msg; t.classList.add("show");
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
   clearTimeout(window._tt);
-  window._tt=setTimeout(function(){t.classList.remove("show")},2200);
+  window._tt=setTimeout(function(){t.classList.remove('show')},2200);
 }
 </script>
 </body>
