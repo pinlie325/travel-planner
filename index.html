@@ -196,23 +196,47 @@ var PACK = [
 ];
 
 // ─── API ───
+// 讀取用 JSONP 繞過 CORS
+function loadFromAPI() {
+  return new Promise(function(resolve, reject) {
+    var cbName = '_cb' + Date.now();
+    var script = document.createElement('script');
+    var timer = setTimeout(function(){
+      delete window[cbName];
+      if(document.body.contains(script)) document.body.removeChild(script);
+      reject(new Error('timeout'));
+    }, 10000);
+    window[cbName] = function(res) {
+      clearTimeout(timer);
+      delete window[cbName];
+      if(document.body.contains(script)) document.body.removeChild(script);
+      resolve(res);
+    };
+    script.src = API_URL + '?callback=' + cbName;
+    script.onerror = function(){ clearTimeout(timer); reject(new Error('script error')); };
+    document.body.appendChild(script);
+  });
+}
+
+// 寫入用 no-cors（不等回應，本地已更新）
 function api(action, payload) {
-  return fetch(API_URL, {
+  fetch(API_URL, {
     method: 'POST',
+    mode: 'no-cors',
     body: JSON.stringify(Object.assign({action: action}, payload))
-  }).then(function(r){ return r.json(); });
+  });
+  return Promise.resolve({ok: true});
 }
 
 window.onload = function() {
   renderDayNav();
   renderPacking();
-  fetch(API_URL)
-    .then(function(r){ return r.json(); })
+  loadFromAPI()
     .then(function(res){
       if(res.ok){ D=res.data; renderTimeline(); renderSpots(); renderBudget(); }
       else toast('❌ 載入失敗');
     })
-    .catch(function(){ toast('❌ 網路錯誤'); });
+    .catch(function(e){ toast('❌ 網路錯誤：' + e.message); });
 };
 
 function switchTab(name,btn){
