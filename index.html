@@ -195,49 +195,26 @@ var PACK = [
   {section:'其他',items:['環保袋','小錢包','墨鏡','帽子','換洗袋','行李秤','哨子（孩子用）']},
 ];
 
-// ─── API（JSONP 繞過 CORS）───
-function callAPI(params) {
-  return new Promise(function(resolve, reject) {
-    var cbName = '_cb' + Date.now() + Math.floor(Math.random()*9999);
-    var script = document.createElement('script');
-    var timer = setTimeout(function(){
-      delete window[cbName];
-      if(document.body.contains(script)) document.body.removeChild(script);
-      reject(new Error('timeout'));
-    }, 15000);
-    window[cbName] = function(res) {
-      clearTimeout(timer);
-      delete window[cbName];
-      if(document.body.contains(script)) document.body.removeChild(script);
-      resolve(res);
-    };
-    var qs = 'callback=' + cbName;
-    Object.keys(params).forEach(function(k){
-      qs += '&' + k + '=' + encodeURIComponent(
-        typeof params[k] === 'object' ? JSON.stringify(params[k]) : String(params[k])
-      );
-    });
-    script.src = API_URL + '?' + qs;
-    script.onerror = function(){
-      clearTimeout(timer);
-      delete window[cbName];
-      if(document.body.contains(script)) document.body.removeChild(script);
-      reject(new Error('script load error'));
-    };
-    document.body.appendChild(script);
-  });
+// ─── API（跟分帳趣一樣：讀用 GET，寫用 POST）───
+async function apiGet() {
+  const r = await fetch(API_URL);
+  return r.json();
+}
+
+async function apiPost(payload) {
+  const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+  return r.json();
 }
 
 function api(action, payload) {
-  var params = Object.assign({ action: action }, payload || {});
-  callAPI(params).catch(function(){});
+  apiPost(Object.assign({ action: action }, payload || {})).catch(function(){});
   return Promise.resolve({ ok: true });
 }
 
 window.onload = function() {
   renderDayNav();
   renderPacking();
-  callAPI({ action: 'load' })
+  apiGet()
     .then(function(res){
       if(res.ok){ D=res.data; renderTimeline(); renderSpots(); renderBudget(); }
       else toast('❌ 載入失敗：' + (res.error||''));
