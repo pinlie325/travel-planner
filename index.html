@@ -280,9 +280,15 @@ function startPoll(){
   stopPoll();
   pollingTimer=setInterval(async()=>{
     if(!activePlan) return;
+    // 如果 overlay 開著，不要打斷使用者操作
+    if(document.getElementById('overlay')) return;
     const c=activePlan.code.replace('PLAN_','');
     const fresh=await apiLoad(c).catch(()=>null);
-    if(fresh){ activePlan=fresh; render(); }
+    if(!fresh) return;
+    // 比對是否真的有變化，避免無謂重繪
+    const oldJSON=JSON.stringify(activePlan);
+    const newJSON=JSON.stringify(fresh);
+    if(oldJSON!==newJSON){ activePlan=fresh; render(); }
   },15000);
 }
 function stopPoll(){ clearInterval(pollingTimer); }
@@ -491,7 +497,7 @@ function bindView(){
         const dayIdx=parseInt(btn.dataset.day), sid=btn.dataset.sid;
         if(!confirm('刪除此行程？')) return;
         activePlan.days[dayIdx].spots=activePlan.days[dayIdx].spots.filter(s=>s.id!==sid);
-        apiSave(activePlan).then(()=>{ toast('已刪除'); render(); });
+        toast('已刪除'); render(); apiSave(activePlan);
       };
     });
   }
@@ -636,7 +642,7 @@ function bindOverlay(){
     } else {
       activePlan.days[dayIdx].spots.push({id:uid(),name,time,note,cat:selCat});
     }
-    apiSave(activePlan).then(()=>{ toast(overlay==='spot-edit'?'已更新':'已新增'); closeOverlay(); render(); });
+    const msg=overlay==='spot-edit'?'已更新':'已新增'; closeOverlay(); render(); toast(msg); apiSave(activePlan);
   });
 
   /* delete from edit sheet */
@@ -644,7 +650,7 @@ function bindOverlay(){
     if(!confirm('刪除此行程？')) return;
     const dayIdx=overlayCtx.dayIdx??currentDay;
     activePlan.days[dayIdx].spots=activePlan.days[dayIdx].spots.filter(s=>s.id!==overlayCtx.sid);
-    apiSave(activePlan).then(()=>{ toast('已刪除'); closeOverlay(); render(); });
+    toast('已刪除'); closeOverlay(); render(); apiSave(activePlan);
   });
 
   /* settings */
