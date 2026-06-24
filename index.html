@@ -1,548 +1,618 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<meta name="theme-color" content="#0f6e6b" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#1a1a2e"/>
 <title>行程趣</title>
 <style>
 :root{
-  --bg1:#f4f0e8; --bg2:#e9e2d5;
-  --sand:#f5f1ea; --card:#fffefb; --ink:#1c2725; --muted:#7c8a86;
-  --line:#e8e1d3; --line2:#f0ebe0;
-  --sea:#0e7d78; --sea-d:#0a5c58; --sea-dd:#073f3d;
-  --coral:#e0655c; --coral-d:#c8504a;
-  --amber:#bf842a; --pos:#10916a;
-  --tint:#e9f3f1;
-  --sh-sm:0 1px 2px rgba(20,40,38,.05);
-  --sh:0 3px 14px rgba(15,70,66,.07),0 1px 3px rgba(20,40,38,.04);
-  --sh-lg:0 12px 38px rgba(12,60,56,.16);
+  --bg:#f7f7f9;
+  --surface:#ffffff;
+  --surface2:#f0f0f4;
+  --ink:#111118;
+  --ink2:#555566;
+  --ink3:#9999aa;
+  --line:#e8e8ee;
+  --accent:#2563eb;
+  --accent-d:#1d4ed8;
+  --accent-light:#eff4ff;
+  --green:#059669;
+  --green-light:#ecfdf5;
+  --red:#dc2626;
+  --red-light:#fef2f2;
+  --amber:#d97706;
+  --sh-sm:0 1px 3px rgba(0,0,0,.07);
+  --sh:0 4px 16px rgba(0,0,0,.08);
+  --sh-lg:0 12px 40px rgba(0,0,0,.12);
+  --r:16px; --r-sm:10px; --r-lg:24px;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0}
-body{
-  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
-  color:var(--ink);
-  background:linear-gradient(180deg,var(--bg1),var(--bg2));
-  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
-  min-height:100vh;
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;background:var(--bg)}
+body{font-family:"PingFang TC","Noto Sans TC",system-ui,-apple-system,sans-serif;
+  color:var(--ink);-webkit-font-smoothing:antialiased}
+button{cursor:pointer;font-family:inherit;border:none;background:none;
+  transition:opacity .15s,transform .1s,background .15s}
+button:active{transform:scale(.97)}
+input,textarea{font-family:inherit}
+
+/* ── layout ── */
+.root{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
+
+/* ── top bar ── */
+.topbar{
+  position:sticky;top:0;z-index:10;
+  background:rgba(247,247,249,.9);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  padding:0 18px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
 }
-.app,.gate{max-width:480px;margin:0 auto;min-height:100vh;background:transparent}
-button{cursor:pointer;font-family:inherit;transition:transform .08s ease,box-shadow .18s ease,background .18s ease,opacity .15s ease}
-button:active{transform:translateY(1px)}
+.topbar-logo{font-size:17px;font-weight:800;letter-spacing:.5px;color:var(--ink)}
+.topbar-logo span{color:var(--accent)}
+.topbar-actions{display:flex;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:17px;background:var(--surface2);color:var(--ink2)}
+.icon-btn:active{background:var(--line)}
 
-/* --- header --- */
-.hdr{position:sticky;top:0;z-index:5;color:#fff;padding:20px 18px 18px;
-  background:
-    radial-gradient(120% 140% at 88% -10%,rgba(255,255,255,.16),transparent 55%),
-    linear-gradient(135deg,var(--sea) 0%,var(--sea-d) 70%,var(--sea-dd) 100%);
-  border-radius:0 0 26px 26px;box-shadow:0 10px 28px rgba(10,70,66,.22)}
-.hdr-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.hdr-name{font-size:22px;font-weight:800;letter-spacing:.6px;line-height:1.15}
-.hdr-sub{font-size:12px;opacity:.82;margin-top:4px;letter-spacing:.3px}
-.hdr-sub b{letter-spacing:1.5px;font-weight:700}
-.hdr-btns{display:flex;gap:8px;flex-shrink:0}
-.leave{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);color:#fff;
-  padding:8px 14px;border-radius:22px;font-size:13px;font-weight:600;backdrop-filter:blur(6px)}
-.leave:active{background:rgba(255,255,255,.28)}
-.hdr-dates{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.16);
-  font-size:13px;opacity:.9;letter-spacing:.4px;display:flex;align-items:center;gap:8px}
-.hdr-dates .icon{font-size:16px}
+/* ── home ── */
+.home-body{padding:20px 16px 120px}
 
-/* --- body --- */
-.body{padding:16px 14px 110px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);
+  text-transform:uppercase;margin:0 2px 12px}
 
-/* --- gate --- */
-.gate{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:30px 22px}
-.gate-card{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:34px 26px;width:100%;box-shadow:var(--sh-lg)}
-.logo{font-size:36px;font-weight:900;text-align:center;letter-spacing:3px;
-  background:linear-gradient(135deg,var(--sea),var(--sea-dd));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.tagline{text-align:center;color:var(--muted);font-size:13px;margin:8px 0 26px;letter-spacing:.5px}
+/* trip card */
+.trip-card{
+  background:var(--surface);border-radius:var(--r);border:1px solid var(--line);
+  padding:16px 18px;margin-bottom:10px;box-shadow:var(--sh-sm);
+  display:flex;align-items:center;gap:14px;
+  cursor:pointer;transition:box-shadow .15s,transform .1s
+}
+.trip-card:active{transform:scale(.985);box-shadow:var(--sh)}
+.trip-card-ic{
+  width:48px;height:48px;border-radius:14px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent-d));
+  display:flex;align-items:center;justify-content:center;font-size:22px
+}
+.trip-card-body{flex:1;min-width:0}
+.trip-card-name{font-size:15px;font-weight:700;letter-spacing:.2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trip-card-meta{font-size:12px;color:var(--ink3);margin-top:3px;display:flex;gap:8px;align-items:center}
+.trip-card-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--ink3);flex-shrink:0}
+.trip-card-chevron{color:var(--ink3);font-size:14px;flex-shrink:0}
 
-/* --- inputs --- */
-.inp{width:100%;border:1.5px solid var(--line);background:#fff;border-radius:13px;padding:12px 14px;
-  font-size:16px;color:var(--ink);margin-bottom:10px;font-family:inherit;transition:border-color .15s,box-shadow .15s}
-.inp:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px rgba(14,125,120,.13)}
-.inp.big{font-size:22px;text-align:center;letter-spacing:4px;font-weight:800}
-.lbl{display:block;font-size:13px;font-weight:800;color:var(--muted);margin:8px 2px 9px;letter-spacing:.3px}
-.err{color:var(--coral-d);font-size:13px;margin-bottom:8px;font-weight:600}
+.empty-state{text-align:center;padding:60px 20px;color:var(--ink3)}
+.empty-state .icon{font-size:48px;margin-bottom:16px;opacity:.5}
+.empty-state .t{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--ink2)}
+.empty-state .s{font-size:13px;line-height:1.7}
 
-/* --- buttons --- */
-.btn{width:100%;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:800;margin-bottom:11px;font-family:inherit;letter-spacing:.5px}
-.btn.primary{background:linear-gradient(135deg,var(--sea),var(--sea-d));color:#fff;box-shadow:0 6px 18px rgba(12,90,86,.28)}
-.btn.ghost{background:#fff;color:var(--sea);border:1.5px solid var(--line)}
-.btn.ghost:active{background:var(--tint)}
-.btn.danger{background:#fdeceb;color:var(--coral-d);border:1.5px solid #f3c3c0;box-shadow:none}
-.btn.sm{width:auto;padding:10px 18px;font-size:14px;margin:0}
+/* ── FAB ── */
+.fab{
+  position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));
+  left:50%;transform:translateX(-50%);
+  z-index:20;display:flex;gap:10px
+}
+.fab-btn{
+  border:none;border-radius:28px;padding:14px 22px;
+  font-size:14px;font-weight:700;font-family:inherit;
+  display:flex;align-items:center;gap:7px;box-shadow:var(--sh-lg);
+  white-space:nowrap;letter-spacing:.3px
+}
+.fab-btn.primary{background:var(--accent);color:#fff}
+.fab-btn.ghost{background:var(--surface);color:var(--ink2);border:1.5px solid var(--line)}
 
-/* --- segmented --- */
-.seg{display:flex;gap:6px;background:#efe9dc;padding:5px;border-radius:14px;margin-bottom:6px}
-.seg-btn{flex:1;border:none;background:transparent;padding:9px;border-radius:10px;font-size:14px;font-weight:700;color:var(--muted);font-family:inherit}
-.seg-btn.on{background:#fff;color:var(--sea);box-shadow:0 2px 6px rgba(0,0,0,.09)}
+/* ── sheet overlay ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:30;
+  display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+.sheet{
+  background:var(--surface);width:100%;max-width:480px;
+  border-radius:24px 24px 0 0;padding:0 18px calc(28px + env(safe-area-inset-bottom));
+  max-height:88vh;overflow-y:auto;
+  animation:slideUp .26s cubic-bezier(.22,.8,.2,1)
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--line);margin:12px auto 20px}
+.sheet-title{font-size:18px;font-weight:800;margin-bottom:20px;letter-spacing:.2px}
 
-/* --- day section --- */
-.day-hdr{display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px}
-.day-label{font-size:13px;font-weight:800;color:var(--sea-d);letter-spacing:.8px;display:flex;align-items:center;gap:8px}
-.day-date{font-size:12px;color:var(--muted);font-weight:600}
-.add-spot-btn{background:var(--tint);border:1.5px dashed rgba(14,125,120,.35);color:var(--sea);
-  border-radius:14px;padding:12px;font-size:14px;font-weight:700;width:100%;margin-bottom:10px;font-family:inherit}
-.add-spot-btn:active{background:#d5ebe8}
+/* ── form elements ── */
+.field{margin-bottom:16px}
+.field-label{font-size:12px;font-weight:700;color:var(--ink3);letter-spacing:.5px;
+  text-transform:uppercase;margin-bottom:7px;display:block}
+.inp{
+  width:100%;background:var(--surface2);border:1.5px solid transparent;
+  border-radius:var(--r-sm);padding:13px 14px;font-size:15px;color:var(--ink);
+  transition:border-color .15s,box-shadow .15s;outline:none
+}
+.inp:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.inp.center{text-align:center;font-size:24px;font-weight:800;letter-spacing:6px}
+textarea.inp{resize:none;line-height:1.5}
 
-/* --- spot card --- */
-.spot{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:14px 15px;
-  margin-bottom:9px;box-shadow:var(--sh-sm);display:flex;gap:13px;align-items:flex-start}
-.spot-left{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0}
-.spot-ic{width:42px;height:42px;border-radius:13px;background:var(--tint);
-  display:flex;align-items:center;justify-content:center;font-size:20px}
-.spot-time{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.3px;white-space:nowrap}
-.spot-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-.spot-name{font-weight:700;font-size:15px;letter-spacing:.2px}
-.spot-note{font-size:12px;color:var(--muted);line-height:1.5}
-.spot-tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:8px;
-  color:#fff;margin-top:2px}
-.spot-del{background:none;border:none;color:var(--coral-d);font-size:18px;padding:4px;flex-shrink:0;opacity:.6}
-.spot-del:active{opacity:1}
+/* ── cat grid ── */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.cat-btn{
+  background:var(--surface2);border:1.5px solid transparent;border-radius:var(--r-sm);
+  padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;color:var(--ink2);font-family:inherit
+}
+.cat-btn span{font-size:20px}
+.cat-btn.on{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
 
-/* --- empty --- */
-.empty{text-align:center;color:var(--muted);padding:60px 24px;line-height:2;font-size:14px}
-.empty-ic{font-size:44px;margin-bottom:12px;opacity:.7}
+/* ── action buttons ── */
+.act-btn{
+  width:100%;border-radius:var(--r-sm);padding:14px;font-size:15px;font-weight:700;
+  font-family:inherit;margin-bottom:10px;letter-spacing:.3px
+}
+.act-btn.primary{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.3)}
+.act-btn.ghost{background:var(--surface2);color:var(--ink2)}
+.act-btn.danger{background:var(--red-light);color:var(--red)}
+.err-msg{font-size:13px;color:var(--red);font-weight:600;margin-bottom:12px}
 
-/* --- fab --- */
-.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:82px;z-index:6;max-width:430px;
-  color:#fff;border:none;padding:14px 30px;border-radius:30px;font-size:16px;font-weight:800;letter-spacing:1px;
-  background:linear-gradient(135deg,var(--coral),var(--coral-d));box-shadow:0 8px 22px rgba(200,80,74,.42)}
-.fab:active{transform:translateX(-50%) translateY(1px)}
+/* ── app view (inside trip) ── */
+.app-topbar{
+  position:sticky;top:0;z-index:10;
+  background:rgba(247,247,249,.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  padding:0 16px;height:56px;display:flex;align-items:center;gap:10px
+}
+.back-btn{width:36px;height:36px;border-radius:50%;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.app-trip-name{font-size:16px;font-weight:800;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.code-pill{
+  background:var(--accent-light);color:var(--accent);
+  border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;
+  letter-spacing:1px;flex-shrink:0;cursor:pointer
+}
 
-/* --- bottom bar --- */
-.bottom-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:6;
-  background:rgba(255,254,251,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);
-  padding:12px 18px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px}
+.app-body{padding:16px 16px 120px}
 
-/* --- sheet --- */
-.sheet-wrap{position:fixed;inset:0;background:rgba(16,26,25,.5);z-index:20;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
-.sheet{background:var(--sand);width:100%;max-width:480px;border-radius:28px 28px 0 0;padding:8px 18px 32px;max-height:90vh;overflow-y:auto;
-  animation:up .28s cubic-bezier(.2,.8,.2,1);box-shadow:0 -10px 40px rgba(0,0,0,.2)}
-@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.sheet-grip{width:42px;height:5px;background:#d8d0bf;border-radius:3px;margin:8px auto 14px}
-.sheet-h{display:flex;justify-content:space-between;align-items:center;font-size:19px;font-weight:800;margin-bottom:16px;letter-spacing:.3px}
-.close-btn{background:rgba(0,0,0,.07);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;display:flex;align-items:center;justify-content:center}
+/* day block */
+.day-block{margin-bottom:28px}
+.day-header{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.day-num{font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.5px}
+.day-date-str{font-size:12px;color:var(--ink3);font-weight:600}
 
-/* --- categories grid --- */
-.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.cat{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:11px 4px;font-size:12px;font-weight:700;
-  color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:5px;font-family:inherit}
-.cat span{font-size:21px}
-.cat.on{border-color:var(--sea);background:var(--tint);color:var(--sea-d);box-shadow:inset 0 0 0 1px var(--sea)}
+/* spot card */
+.spot-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:8px;box-shadow:var(--sh-sm);
+  display:flex;gap:12px;align-items:flex-start;cursor:pointer;
+  transition:box-shadow .15s
+}
+.spot-card:active{box-shadow:var(--sh)}
+.spot-icon{width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:19px}
+.spot-content{flex:1;min-width:0}
+.spot-name{font-size:14px;font-weight:700;margin-bottom:3px}
+.spot-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.spot-time{font-size:12px;color:var(--ink3);font-weight:600;
+  display:flex;align-items:center;gap:3px}
+.spot-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+.spot-note{font-size:12px;color:var(--ink2);margin-top:5px;line-height:1.5}
+.spot-del-btn{width:28px;height:28px;border-radius:50%;background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--ink3);flex-shrink:0;align-self:center}
+.spot-del-btn:active{background:var(--red-light);color:var(--red)}
 
-/* --- modal --- */
-.modal-wrap{position:fixed;inset:0;background:rgba(16,26,25,.55);z-index:30;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px)}
-.modal{background:var(--card);border-radius:24px;padding:28px 22px;width:100%;max-width:400px;box-shadow:var(--sh-lg);animation:pop .22s cubic-bezier(.2,.8,.2,1)}
-@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
-.modal-title{font-size:20px;font-weight:800;margin-bottom:8px;text-align:center}
-.modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px;text-align:center;line-height:1.7}
-.modal-code{font-size:36px;font-weight:900;text-align:center;letter-spacing:8px;color:var(--sea-d);margin:16px 0;
-  background:var(--tint);border-radius:16px;padding:16px}
+.add-spot{
+  border:1.5px dashed var(--line);border-radius:var(--r);
+  padding:13px;width:100%;font-size:13px;font-weight:700;
+  color:var(--ink3);display:flex;align-items:center;justify-content:center;gap:6px;
+  background:transparent;font-family:inherit
+}
+.add-spot:active{background:var(--surface2)}
 
-/* --- toast --- */
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:50;
-  background:rgba(28,39,37,.92);color:#fff;padding:11px 22px;border-radius:22px;
-  font-size:14px;font-weight:600;white-space:nowrap;pointer-events:none;
-  animation:fadein .2s ease;letter-spacing:.3px}
-@keyframes fadein{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+/* ── modal ── */
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;
+  display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+.modal{background:var(--surface);border-radius:var(--r-lg);padding:28px 24px;
+  width:100%;max-width:380px;box-shadow:var(--sh-lg);
+  animation:popIn .22s cubic-bezier(.22,.8,.2,1)}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-icon{font-size:40px;text-align:center;margin-bottom:12px}
+.modal-title{font-size:20px;font-weight:800;text-align:center;margin-bottom:8px}
+.modal-sub{font-size:13px;color:var(--ink2);text-align:center;line-height:1.7;margin-bottom:20px}
+.code-display{
+  background:var(--accent-light);border-radius:var(--r-sm);padding:18px;
+  text-align:center;font-size:34px;font-weight:900;
+  letter-spacing:10px;color:var(--accent);margin-bottom:20px
+}
 
-/* --- chip share --- */
-.code-chip{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.2);
-  border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:6px 14px;
-  font-size:13px;font-weight:700;color:#fff;cursor:pointer;backdrop-filter:blur(4px)}
-.code-chip:active{background:rgba(255,255,255,.32)}
+/* ── toast ── */
+.toast{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:99;
+  background:rgba(17,17,24,.9);color:#fff;padding:10px 20px;border-radius:20px;
+  font-size:13px;font-weight:600;white-space:nowrap;pointer-events:none;
+  animation:toastIn .2s ease
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div class="root" id="root"></div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbwHUQw1fmW_mCXwMEe2tM8SolZMBz-mzZMHr1F4iCxk-zQ4qfVia_Dm0udE8oj02dj5XQ/exec';
+const API_URL='https://script.google.com/macros/s/AKfycbwHUQw1fmW_mCXwMEe2tM8SolZMBz-mzZMHr1F4iCxk-zQ4qfVia_Dm0udE8oj02dj5XQ/exec';
 
-const SPOT_CATS = [
-  {id:'food',   label:'餐飲',   icon:'🍜', color:'#e0894a'},
-  {id:'stay',   label:'住宿',   icon:'🏨', color:'#3f9fb0'},
-  {id:'go',     label:'交通',   icon:'🚌', color:'#6aa84f'},
-  {id:'sight',  label:'景點',   icon:'⛩️',  color:'#9b6dd4'},
-  {id:'shop',   label:'購物',   icon:'🛍️', color:'#d9a441'},
-  {id:'other',  label:'其他',   icon:'💡', color:'#8a8f98'},
+const CATS=[
+  {id:'food',  label:'餐飲',  icon:'🍜', bg:'#fff7ed', color:'#c2410c'},
+  {id:'sight', label:'景點',  icon:'⛩️',  bg:'#f5f3ff', color:'#7c3aed'},
+  {id:'go',    label:'交通',  icon:'🚌', bg:'#f0fdf4', color:'#15803d'},
+  {id:'stay',  label:'住宿',  icon:'🏨', bg:'#eff6ff', color:'#1d4ed8'},
+  {id:'shop',  label:'購物',  icon:'🛍️', bg:'#fefce8', color:'#a16207'},
+  {id:'other', label:'其他',  icon:'💡', bg:'#f8fafc', color:'#475569'},
 ];
-const catOf = id => SPOT_CATS.find(c=>c.id===id) || SPOT_CATS[5];
-const uid   = () => Math.random().toString(36).slice(2,9);
-const esc   = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const catOf=id=>CATS.find(c=>c.id===id)||CATS[5];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='itinerary_trips'; // localStorage key for trip list
 
-/* ---- state ---- */
-let plan = null, code = null;
-let gateMode = 'home'; // home | create | join
-let gateErr = '';
-let sheetOpen = false, sheetDay = null, sheetEditing = null;
-let pollingTimer = null;
+/* ─── state ─── */
+let trips=[];      // [{code,name,startDate,days}] — local index
+let activePlan=null;
+let view='home';   // 'home' | 'trip'
+let overlay=null;  // null | 'create' | 'join' | 'spot-add' | 'spot-edit'
+let overlayCtx={};
+let pollingTimer=null;
 
-/* ---- api ---- */
+/* ─── localStorage trip index ─── */
+function loadIndex(){
+  try{ trips=JSON.parse(localStorage.getItem(KEY)||'[]'); }catch{ trips=[]; }
+}
+function saveIndex(){
+  localStorage.setItem(KEY,JSON.stringify(trips));
+}
+function addToIndex(p){
+  const c=p.code.replace('PLAN_','');
+  if(!trips.find(t=>t.code===c)){
+    trips.unshift({code:c, name:p.name, startDate:p.startDate, days:p.days.length});
+    saveIndex();
+  }
+}
+function removeFromIndex(c){
+  trips=trips.filter(t=>t.code!==c);
+  saveIndex();
+}
+
+/* ─── api ─── */
 async function apiLoad(c){
-  const r = await fetch(API_URL+'?code=PLAN_'+c);
-  const d = await r.json();
-  return d.trip;
+  const r=await fetch(API_URL+'?code=PLAN_'+c);
+  const d=await r.json();
+  return d.trip||null;
 }
 async function apiSave(p){
-  await fetch(API_URL,{method:'POST',body:JSON.stringify(p)});
+  return fetch(API_URL,{method:'POST',body:JSON.stringify(p)});
 }
 
-async function save(next){
-  if(!plan) return;
-  await apiSave(plan);
-  if(next) next();
-}
-
-/* ---- poll ---- */
+/* ─── poll ─── */
 function startPoll(){
   stopPoll();
-  pollingTimer = setInterval(async()=>{
-    if(!code) return;
-    const fresh = await apiLoad(code);
-    if(fresh) { plan = fresh; render(); }
-  }, 15000);
+  pollingTimer=setInterval(async()=>{
+    if(!activePlan) return;
+    const c=activePlan.code.replace('PLAN_','');
+    const fresh=await apiLoad(c).catch(()=>null);
+    if(fresh){ activePlan=fresh; render(); }
+  },15000);
 }
 function stopPoll(){ clearInterval(pollingTimer); }
 
-/* ---- helpers ---- */
+/* ─── helpers ─── */
 function toast(msg){
-  const t=document.createElement('div');
-  t.className='toast'; t.textContent=msg;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),2200);
+  const el=document.createElement('div');
+  el.className='toast'; el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2000);
 }
-
 function copyText(t){
-  if(navigator.clipboard){ navigator.clipboard.writeText(t).then(()=>toast('已複製！')).catch(()=>fallbackCopy(t)); }
-  else fallbackCopy(t);
+  navigator.clipboard?.writeText(t).then(()=>toast('已複製代碼！')).catch(()=>fbCopy(t));
 }
-function fallbackCopy(t){
-  const ta=document.createElement('textarea');
-  ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
-  document.body.appendChild(ta); ta.select();
-  try{ document.execCommand('copy'); toast('已複製！'); } catch(e){ toast('複製失敗'); }
-  document.body.removeChild(ta);
+function fbCopy(t){
+  const ta=Object.assign(document.createElement('textarea'),{value:t});
+  Object.assign(ta.style,{position:'fixed',opacity:'0'});
+  document.body.append(ta); ta.select();
+  try{ document.execCommand('copy'); toast('已複製代碼！'); }catch{ toast('請手動複製代碼'); }
+  ta.remove();
 }
 
-function newPlan(c, name, startDate, days){
+function dayDate(startDate,idx){
+  if(!startDate) return null;
+  const d=new Date(startDate); d.setDate(d.getDate()+idx);
+  return d.toLocaleDateString('zh-Hant',{month:'numeric',day:'numeric',weekday:'short'});
+}
+function newPlan(c,name,startDate,days){
   return {
-    code: 'PLAN_'+c,
-    name, startDate,
-    days: Array.from({length:days},(_,i)=>({id:uid(), dayIndex:i, spots:[]})),
-    createdAt: Date.now()
+    code:'PLAN_'+c, name, startDate:startDate||null,
+    days:Array.from({length:days},(_,i)=>({id:uid(),dayIndex:i,spots:[]})),
+    createdAt:Date.now()
   };
 }
 
-function dayDate(startDate, idx){
-  if(!startDate) return null;
-  const d = new Date(startDate);
-  d.setDate(d.getDate()+idx);
-  return d.toLocaleDateString('zh-Hant',{month:'numeric',day:'numeric',weekday:'short'});
-}
-
-/* ======================== RENDER ======================== */
+/* ═══════════════ RENDER ═══════════════ */
 function render(){
-  const root = document.getElementById('root');
-  if(!plan){
-    root.innerHTML = gateHTML();
-    bindGate();
-  } else {
-    root.innerHTML = appHTML();
-    bindApp();
-  }
-  if(document.getElementById('sheet-container').innerHTML){
-    // re-render sheet if open
-  }
+  document.getElementById('root').innerHTML=
+    view==='home' ? homeHTML() : tripHTML();
+  bindView();
+  if(overlay) showOverlay();
 }
 
-/* ---- gate ---- */
-function gateHTML(){
-  if(gateMode==='create') return createHTML();
-  if(gateMode==='join')   return joinHTML();
-  return homeHTML();
-}
-
+/* ─── home ─── */
 function homeHTML(){
+  const cards = trips.length===0
+    ? `<div class="empty-state">
+        <div class="icon">🗺️</div>
+        <div class="t">還沒有行程</div>
+        <div class="s">建立或加入一個行程<br>開始規劃你的旅行吧</div>
+       </div>`
+    : trips.map(t=>{
+        const icon = t.days<=3?'🏙️':t.days<=6?'✈️':'🌏';
+        const meta = t.startDate
+          ? new Date(t.startDate).toLocaleDateString('zh-Hant',{month:'long',day:'numeric'})+'  出發'
+          : `共 ${t.days} 天`;
+        return `<div class="trip-card" data-code="${esc(t.code)}">
+          <div class="trip-card-ic">${icon}</div>
+          <div class="trip-card-body">
+            <div class="trip-card-name">${esc(t.name)}</div>
+            <div class="trip-card-meta">
+              <span>${meta}</span>
+              <span class="dot"></span>
+              <span>${t.days} 天行程</span>
+            </div>
+          </div>
+          <span class="trip-card-chevron">›</span>
+        </div>`;
+      }).join('');
+
   return `
-  <div class="gate">
-    <div class="gate-card">
-      <div class="logo">行程趣</div>
-      <div class="tagline">一起規劃、一起出發 ✈️</div>
-      ${gateErr?`<div class="err">${esc(gateErr)}</div>`:''}
-      <button class="btn primary" id="btn-create">＋ 建立新行程</button>
-      <button class="btn ghost" id="btn-join">輸入代碼加入行程</button>
-    </div>
+  <div class="topbar">
+    <div class="topbar-logo">行程<span>趣</span></div>
+  </div>
+  <div class="home-body">
+    ${trips.length>0?`<div class="section-label">我的行程</div>`:''}
+    ${cards}
+  </div>
+  <div class="fab">
+    <button class="fab-btn ghost" id="fab-join">加入行程</button>
+    <button class="fab-btn primary" id="fab-create">＋ 新行程</button>
   </div>`;
 }
 
-function createHTML(){
-  return `
-  <div class="gate">
-    <div class="gate-card">
-      <div class="logo" style="font-size:24px;margin-bottom:4px">建立行程</div>
-      <div class="tagline" style="margin-bottom:20px">填寫旅程基本資訊</div>
-      ${gateErr?`<div class="err">${esc(gateErr)}</div>`:''}
-      <label class="lbl">行程名稱</label>
-      <input class="inp" id="g-name" placeholder="例：馬來西亞五天四夜" maxlength="40" />
-      <label class="lbl">出發日期（選填）</label>
-      <input class="inp" id="g-date" type="date" />
-      <label class="lbl">共幾天</label>
-      <input class="inp" id="g-days" type="number" min="1" max="30" value="4" />
-      <button class="btn primary" id="btn-do-create">建立行程</button>
-      <button class="btn ghost" id="btn-back">← 返回</button>
-    </div>
-  </div>`;
-}
-
-function joinHTML(){
-  return `
-  <div class="gate">
-    <div class="gate-card">
-      <div class="logo" style="font-size:24px;margin-bottom:4px">加入行程</div>
-      <div class="tagline" style="margin-bottom:20px">輸入朋友分享的代碼</div>
-      ${gateErr?`<div class="err">${esc(gateErr)}</div>`:''}
-      <input class="inp big" id="g-code" placeholder="ABCD" maxlength="6" autocapitalize="characters" />
-      <button class="btn primary" id="btn-do-join">加入</button>
-      <button class="btn ghost" id="btn-back">← 返回</button>
-    </div>
-  </div>`;
-}
-
-/* ---- app ---- */
-function appHTML(){
-  const c = plan.code.replace('PLAN_','');
-  const dateInfo = plan.startDate
-    ? `${plan.startDate.replace(/-/g,'/')} 出發`
-    : `共 ${plan.days.length} 天`;
-
-  const daysHTML = plan.days.map((day,i)=>{
-    const dd = dayDate(plan.startDate, i);
-    const spotsHTML = day.spots.length===0
-      ? `<div style="font-size:13px;color:var(--muted);text-align:center;padding:10px 0 6px;opacity:.7">尚無行程，點下方新增</div>`
+/* ─── trip view ─── */
+function tripHTML(){
+  const p=activePlan;
+  const c=p.code.replace('PLAN_','');
+  const daysHTML=p.days.map((day,i)=>{
+    const dd=dayDate(p.startDate,i);
+    const spots=day.spots.length===0
+      ? `<div style="font-size:12px;color:var(--ink3);padding:4px 0 8px 2px">尚無行程</div>`
       : day.spots.map(s=>spotCardHTML(s,i)).join('');
-    return `
-    <div class="day-hdr">
-      <div class="day-label">
-        <span>DAY ${i+1}</span>
-        ${dd?`<span class="day-date">${dd}</span>`:''}
+    return `<div class="day-block">
+      <div class="day-header">
+        <span class="day-num">DAY ${i+1}</span>
+        ${dd?`<span class="day-date-str">${dd}</span>`:''}
       </div>
-    </div>
-    ${spotsHTML}
-    <button class="add-spot-btn" data-day="${i}">＋ 新增景點</button>`;
+      ${spots}
+      <button class="add-spot" data-day="${i}">＋ 新增景點</button>
+    </div>`;
   }).join('');
 
   return `
-  <div class="app">
-    <div class="hdr">
-      <div class="hdr-row">
-        <div>
-          <div class="hdr-name">${esc(plan.name)}</div>
-          <div class="hdr-sub">${dateInfo}</div>
-        </div>
-        <div class="hdr-btns">
-          <button class="code-chip" id="btn-share">📋 ${c}</button>
-          <button class="leave" id="btn-leave">離開</button>
-        </div>
-      </div>
-    </div>
-    <div class="body">${daysHTML}</div>
+  <div class="app-topbar">
+    <button class="back-btn" id="btn-back">←</button>
+    <div class="app-trip-name">${esc(p.name)}</div>
+    <div class="code-pill" id="btn-code">${c}</div>
   </div>
-  <div id="sheet-container"></div>`;
+  <div class="app-body">${daysHTML}</div>`;
 }
 
-function spotCardHTML(s, dayIdx){
-  const cat = catOf(s.cat);
-  return `
-  <div class="spot" data-sid="${esc(s.id)}" data-day="${dayIdx}">
-    <div class="spot-left">
-      <div class="spot-ic">${cat.icon}</div>
-      ${s.time?`<div class="spot-time">${esc(s.time)}</div>`:''}
-    </div>
-    <div class="spot-mid">
+function spotCardHTML(s,dayIdx){
+  const cat=catOf(s.cat);
+  return `<div class="spot-card" data-sid="${esc(s.id)}" data-day="${dayIdx}">
+    <div class="spot-icon" style="background:${cat.bg}">${cat.icon}</div>
+    <div class="spot-content">
       <div class="spot-name">${esc(s.name||'（未命名）')}</div>
+      <div class="spot-meta">
+        ${s.time?`<span class="spot-time">🕐 ${esc(s.time)}</span>`:''}
+        <span class="spot-tag" style="background:${cat.bg};color:${cat.color}">${cat.label}</span>
+      </div>
       ${s.note?`<div class="spot-note">${esc(s.note)}</div>`:''}
-      <div><span class="spot-tag" style="background:${cat.color}">${cat.label}</span></div>
     </div>
-    <button class="spot-del" data-sid="${esc(s.id)}" data-day="${dayIdx}" title="刪除">✕</button>
+    <button class="spot-del-btn" data-sid="${esc(s.id)}" data-day="${dayIdx}">✕</button>
   </div>`;
 }
 
-/* ======================== BIND ======================== */
-function bindGate(){
-  const q = id => document.getElementById(id);
-  if(gateMode==='home'){
-    q('btn-create').onclick=()=>{ gateMode='create'; gateErr=''; render(); };
-    q('btn-join').onclick=()=>{ gateMode='join'; gateErr=''; render(); };
-  } else if(gateMode==='create'){
-    q('btn-back').onclick=()=>{ gateMode='home'; gateErr=''; render(); };
-    q('btn-do-create').onclick=async()=>{
-      const name = q('g-name').value.trim();
-      const date = q('g-date').value;
-      const days = parseInt(q('g-days').value)||4;
-      if(!name){ gateErr='請輸入行程名稱'; render(); return; }
-      if(days<1||days>30){ gateErr='天數請填 1～30'; render(); return; }
-      const c = Math.random().toString(36).slice(2,6).toUpperCase();
-      plan = newPlan(c, name, date||null, days);
-      await apiSave(plan);
-      code = c;
-      gateMode='home'; gateErr='';
-      showCodeModal(c);
-      startPoll();
-      render();
-    };
-  } else if(gateMode==='join'){
-    const inp = q('g-code');
-    if(inp) inp.addEventListener('input',()=>{ inp.value=inp.value.toUpperCase(); });
-    q('btn-back').onclick=()=>{ gateMode='home'; gateErr=''; render(); };
-    q('btn-do-join').onclick=async()=>{
-      const c = (q('g-code').value||'').trim().toUpperCase();
-      if(!c){ gateErr='請輸入代碼'; render(); return; }
-      const p = await apiLoad(c);
-      if(!p){ gateErr='找不到行程，請確認代碼'; render(); return; }
-      plan = p; code = c;
-      gateMode='home'; gateErr='';
-      startPoll();
-      render();
-    };
+/* ═══════════════ BIND ═══════════════ */
+function bindView(){
+  if(view==='home'){
+    document.getElementById('fab-create').onclick=()=>{ overlay='create'; overlayCtx={}; showOverlay(); };
+    document.getElementById('fab-join').onclick=()=>{ overlay='join'; overlayCtx={}; showOverlay(); };
+    document.querySelectorAll('.trip-card').forEach(el=>{
+      el.onclick=async()=>{
+        const c=el.dataset.code;
+        const p=await apiLoad(c);
+        if(!p){ toast('找不到行程，可能已刪除'); removeFromIndex(c); render(); return; }
+        activePlan=p; view='trip'; startPoll(); render();
+      };
+    });
+  } else {
+    document.getElementById('btn-back').onclick=()=>{ view='home'; activePlan=null; stopPoll(); render(); };
+    document.getElementById('btn-code').onclick=()=>copyText(activePlan.code.replace('PLAN_',''));
+    document.querySelectorAll('.add-spot').forEach(btn=>{
+      btn.onclick=()=>{ overlay='spot-add'; overlayCtx={dayIdx:parseInt(btn.dataset.day)}; showOverlay(); };
+    });
+    document.querySelectorAll('.spot-card').forEach(el=>{
+      el.onclick=e=>{
+        if(e.target.classList.contains('spot-del-btn')||e.target.closest('.spot-del-btn')) return;
+        const dayIdx=parseInt(el.dataset.day);
+        const sid=el.dataset.sid;
+        const spot=activePlan.days[dayIdx].spots.find(s=>s.id===sid);
+        overlay='spot-edit'; overlayCtx={dayIdx,sid,spot}; showOverlay();
+      };
+    });
+    document.querySelectorAll('.spot-del-btn').forEach(btn=>{
+      btn.onclick=e=>{ e.stopPropagation();
+        const dayIdx=parseInt(btn.dataset.day); const sid=btn.dataset.sid;
+        if(!confirm('刪除此景點？')) return;
+        activePlan.days[dayIdx].spots=activePlan.days[dayIdx].spots.filter(s=>s.id!==sid);
+        apiSave(activePlan).then(()=>{ toast('已刪除'); render(); });
+      };
+    });
   }
 }
 
-function bindApp(){
-  document.getElementById('btn-leave').onclick=()=>{
-    if(confirm('離開行程？（代碼仍可再次加入）')){
-      plan=null; code=null; stopPoll(); render();
-    }
-  };
-  document.getElementById('btn-share').onclick=()=>{
-    const c = plan.code.replace('PLAN_','');
-    copyText(c);
-  };
+/* ═══════════════ OVERLAY ═══════════════ */
+function showOverlay(){
+  let html='';
+  if(overlay==='create') html=createSheetHTML();
+  else if(overlay==='join') html=joinSheetHTML();
+  else if(overlay==='spot-add'||overlay==='spot-edit') html=spotSheetHTML();
 
-  // add spot buttons
-  document.querySelectorAll('.add-spot-btn').forEach(btn=>{
-    btn.onclick=()=>openSheet(parseInt(btn.dataset.day), null);
+  const wrap=document.createElement('div');
+  wrap.className='overlay'; wrap.id='overlay';
+  wrap.innerHTML=`<div class="sheet">${html}</div>`;
+  document.body.appendChild(wrap);
+  wrap.onclick=e=>{ if(e.target===wrap) closeOverlay(); };
+  bindOverlay();
+}
+
+function closeOverlay(){
+  overlay=null; overlayCtx={};
+  document.getElementById('overlay')?.remove();
+}
+
+/* create sheet */
+function createSheetHTML(){
+  return `<div class="sheet-handle"></div>
+  <div class="sheet-title">建立新行程</div>
+  <div id="sheet-err" class="err-msg" style="display:none"></div>
+  <div class="field"><label class="field-label">行程名稱</label>
+    <input class="inp" id="f-name" placeholder="例：沖繩五天四夜" maxlength="40"/></div>
+  <div class="field"><label class="field-label">出發日期（選填）</label>
+    <input class="inp" id="f-date" type="date"/></div>
+  <div class="field"><label class="field-label">共幾天</label>
+    <input class="inp" id="f-days" type="number" min="1" max="30" value="4"/></div>
+  <button class="act-btn primary" id="do-create">建立行程</button>
+  <button class="act-btn ghost" id="cancel-sheet">取消</button>`;
+}
+
+/* join sheet */
+function joinSheetHTML(){
+  return `<div class="sheet-handle"></div>
+  <div class="sheet-title">加入行程</div>
+  <div id="sheet-err" class="err-msg" style="display:none"></div>
+  <div class="field"><label class="field-label">行程代碼</label>
+    <input class="inp center" id="f-code" placeholder="ABCD" maxlength="6" autocapitalize="characters"/></div>
+  <button class="act-btn primary" id="do-join">加入</button>
+  <button class="act-btn ghost" id="cancel-sheet">取消</button>`;
+}
+
+/* spot sheet */
+function spotSheetHTML(){
+  const editing=overlay==='spot-edit';
+  const s=editing?overlayCtx.spot:{};
+  const selCat=s.cat||'sight';
+  const grid=CATS.map(c=>`<button class="cat-btn${c.id===selCat?' on':''}" data-cat="${c.id}">
+    <span>${c.icon}</span>${c.label}</button>`).join('');
+  return `<div class="sheet-handle"></div>
+  <div class="sheet-title">${editing?'編輯景點':'新增景點'}</div>
+  <div class="field"><label class="field-label">景點名稱</label>
+    <input class="inp" id="f-sname" placeholder="例：金閣寺" value="${esc(s.name||'')}"/></div>
+  <div class="field"><label class="field-label">時間（選填）</label>
+    <input class="inp" id="f-stime" placeholder="09:00" value="${esc(s.time||'')}"/></div>
+  <div class="field"><label class="field-label">類型</label>
+    <div class="cat-grid" id="cat-grid">${grid}</div></div>
+  <div class="field"><label class="field-label">備註（選填）</label>
+    <textarea class="inp" id="f-snote" rows="2" placeholder="地址、預約資訊…">${esc(s.note||'')}</textarea></div>
+  <button class="act-btn primary" id="do-spot">${editing?'儲存':'加入行程'}</button>
+  ${editing?`<button class="act-btn danger" id="do-del-spot">刪除此景點</button>`:''}
+  <button class="act-btn ghost" id="cancel-sheet">取消</button>`;
+}
+
+function bindOverlay(){
+  document.getElementById('cancel-sheet')?.addEventListener('click',closeOverlay);
+
+  /* create */
+  document.getElementById('do-create')?.addEventListener('click',async()=>{
+    const name=document.getElementById('f-name').value.trim();
+    const date=document.getElementById('f-date').value;
+    const days=parseInt(document.getElementById('f-days').value)||4;
+    const errEl=document.getElementById('sheet-err');
+    if(!name){ errEl.textContent='請輸入行程名稱'; errEl.style.display='block'; return; }
+    if(days<1||days>30){ errEl.textContent='天數請填 1～30'; errEl.style.display='block'; return; }
+    const c=Math.random().toString(36).slice(2,6).toUpperCase();
+    const p=newPlan(c,name,date||null,days);
+    await apiSave(p);
+    addToIndex(p); activePlan=p;
+    closeOverlay(); showCodeModal(c);
+    view='trip'; startPoll(); render();
   });
 
-  // spot click to edit
-  document.querySelectorAll('.spot').forEach(el=>{
-    el.onclick=(e)=>{
-      if(e.target.classList.contains('spot-del')) return;
-      const dayIdx = parseInt(el.dataset.day);
-      const sid = el.dataset.sid;
-      openSheet(dayIdx, sid);
-    };
+  /* join */
+  const codeInp=document.getElementById('f-code');
+  codeInp?.addEventListener('input',()=>{ codeInp.value=codeInp.value.toUpperCase(); });
+  document.getElementById('do-join')?.addEventListener('click',async()=>{
+    const c=(document.getElementById('f-code').value||'').trim().toUpperCase();
+    const errEl=document.getElementById('sheet-err');
+    if(!c){ errEl.textContent='請輸入代碼'; errEl.style.display='block'; return; }
+    const p=await apiLoad(c).catch(()=>null);
+    if(!p){ errEl.textContent='找不到行程，請確認代碼'; errEl.style.display='block'; return; }
+    addToIndex(p); activePlan=p;
+    closeOverlay(); view='trip'; startPoll(); render();
   });
 
-  // delete spot
-  document.querySelectorAll('.spot-del').forEach(btn=>{
-    btn.onclick=(e)=>{
-      e.stopPropagation();
-      const dayIdx = parseInt(btn.dataset.day);
-      const sid = btn.dataset.sid;
-      if(!confirm('刪除此景點？')) return;
-      plan.days[dayIdx].spots = plan.days[dayIdx].spots.filter(s=>s.id!==sid);
-      save(()=>{ toast('已刪除'); render(); });
-    };
-  });
-}
-
-/* ======================== SHEET ======================== */
-function openSheet(dayIdx, sid){
-  sheetOpen=true; sheetDay=dayIdx;
-  sheetEditing = sid ? plan.days[dayIdx].spots.find(s=>s.id===sid) : null;
-  const sc = document.getElementById('sheet-container');
-  sc.innerHTML = sheetHTML();
-  bindSheet();
-}
-
-function closeSheet(){
-  sheetOpen=false; sheetDay=null; sheetEditing=null;
-  document.getElementById('sheet-container').innerHTML='';
-}
-
-function sheetHTML(){
-  const s = sheetEditing;
-  const catsGrid = SPOT_CATS.map(c=>`
-    <button class="cat${(s?s.cat:null)===c.id?' on':''}" data-cat="${c.id}">
-      <span>${c.icon}</span>${c.label}
-    </button>`).join('');
-
-  return `
-  <div class="sheet-wrap" id="sheet-wrap">
-    <div class="sheet">
-      <div class="sheet-grip"></div>
-      <div class="sheet-h">
-        <span>${s?'編輯景點':'新增景點'}</span>
-        <button class="close-btn" id="sheet-close">✕</button>
-      </div>
-      <label class="lbl">景點名稱</label>
-      <input class="inp" id="s-name" placeholder="例：雙峰塔" value="${esc(s?s.name:'')}" />
-      <label class="lbl">時間（選填）</label>
-      <input class="inp" id="s-time" placeholder="例：09:00" value="${esc(s?s.time:'')}" />
-      <label class="lbl">類型</label>
-      <div class="cats" id="cats-grid">${catsGrid}</div>
-      <label class="lbl">備註（選填）</label>
-      <textarea class="inp" id="s-note" rows="2" placeholder="地址、預訂資訊…" style="resize:none">${esc(s?s.note:'')}</textarea>
-      <button class="btn primary" style="margin-top:8px" id="sheet-submit">${s?'儲存變更':'加入行程'}</button>
-    </div>
-  </div>`;
-}
-
-function bindSheet(){
-  let selectedCat = sheetEditing ? sheetEditing.cat : 'sight';
-
-  // cat grid
-  document.querySelectorAll('#cats-grid .cat').forEach(btn=>{
+  /* cat grid */
+  let selCat=overlayCtx.spot?.cat||'sight';
+  document.querySelectorAll('#cat-grid .cat-btn').forEach(btn=>{
     btn.onclick=()=>{
-      selectedCat=btn.dataset.cat;
-      document.querySelectorAll('#cats-grid .cat').forEach(b=>b.classList.remove('on'));
+      selCat=btn.dataset.cat;
+      document.querySelectorAll('#cat-grid .cat-btn').forEach(b=>b.classList.remove('on'));
       btn.classList.add('on');
     };
   });
 
-  document.getElementById('sheet-close').onclick=closeSheet;
-  document.getElementById('sheet-wrap').onclick=e=>{ if(e.target.id==='sheet-wrap') closeSheet(); };
-
-  document.getElementById('sheet-submit').onclick=()=>{
-    const name = document.getElementById('s-name').value.trim();
-    const time = document.getElementById('s-time').value.trim();
-    const note = document.getElementById('s-note').value.trim();
+  /* spot submit */
+  document.getElementById('do-spot')?.addEventListener('click',()=>{
+    const name=document.getElementById('f-sname').value.trim();
+    const time=document.getElementById('f-stime').value.trim();
+    const note=document.getElementById('f-snote').value.trim();
     if(!name){ toast('請填寫景點名稱'); return; }
-    if(sheetEditing){
-      sheetEditing.name=name; sheetEditing.time=time; sheetEditing.note=note; sheetEditing.cat=selectedCat;
+    const dayIdx=overlayCtx.dayIdx;
+    if(overlay==='spot-edit'){
+      const spot=activePlan.days[dayIdx].spots.find(s=>s.id===overlayCtx.sid);
+      Object.assign(spot,{name,time,note,cat:selCat});
     } else {
-      plan.days[sheetDay].spots.push({id:uid(),name,time,note,cat:selectedCat});
+      activePlan.days[dayIdx].spots.push({id:uid(),name,time,note,cat:selCat});
     }
-    save(()=>{ toast(sheetEditing?'已更新':'已加入'); closeSheet(); render(); });
-  };
+    apiSave(activePlan).then(()=>{ toast(overlay==='spot-edit'?'已更新':'已新增'); closeOverlay(); render(); });
+  });
+
+  /* delete from edit sheet */
+  document.getElementById('do-del-spot')?.addEventListener('click',()=>{
+    if(!confirm('刪除此景點？')) return;
+    const dayIdx=overlayCtx.dayIdx;
+    activePlan.days[dayIdx].spots=activePlan.days[dayIdx].spots.filter(s=>s.id!==overlayCtx.sid);
+    apiSave(activePlan).then(()=>{ toast('已刪除'); closeOverlay(); render(); });
+  });
 }
 
-/* ======================== CODE MODAL ======================== */
+/* ─── code modal ─── */
 function showCodeModal(c){
-  const wrap = document.createElement('div');
+  const wrap=document.createElement('div');
   wrap.className='modal-wrap';
-  wrap.innerHTML=`
-    <div class="modal">
-      <div class="modal-title">🎉 行程建立成功！</div>
-      <div class="modal-sub">把代碼分享給旅伴，大家都能一起編輯行程。</div>
-      <div class="modal-code">${c}</div>
-      <button class="btn primary" id="mc-copy">複製代碼</button>
-      <button class="btn ghost" id="mc-ok">開始規劃</button>
-    </div>`;
+  wrap.innerHTML=`<div class="modal">
+    <div class="modal-icon">🎉</div>
+    <div class="modal-title">行程建立成功</div>
+    <div class="modal-sub">把代碼分享給旅伴<br>大家都能一起編輯行程</div>
+    <div class="code-display">${c}</div>
+    <button class="act-btn primary" id="mc-copy">複製代碼</button>
+    <button class="act-btn ghost" id="mc-ok">開始規劃</button>
+  </div>`;
   document.body.appendChild(wrap);
   wrap.querySelector('#mc-copy').onclick=()=>copyText(c);
   wrap.querySelector('#mc-ok').onclick=()=>wrap.remove();
 }
 
-/* ======================== INIT ======================== */
-(function(){
-  render();
-})();
+/* ─── init ─── */
+loadIndex();
+render();
 </script>
 </body>
 </html>
