@@ -260,6 +260,21 @@ textarea.inp{resize:none;line-height:1.5}
 .ov-empty{font-size:12px;color:var(--ink3);padding:8px 0 4px;opacity:.7}
 .no-spot{font-size:13px;color:var(--ink3);text-align:center;padding:32px 0 20px;line-height:2}
 .no-spot .ic{font-size:32px;opacity:.4;display:block;margin-bottom:6px}
+
+/* ── admin ── */
+.admin-bar{background:#1e293b;color:#fff;padding:10px 16px;font-size:12px;font-weight:700;
+  letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between}
+.admin-badge{background:#ef4444;color:#fff;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700}
+.admin-exit{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;
+  padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.admin-trip-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:8px;box-shadow:var(--sh-sm);
+  display:flex;align-items:center;gap:12px}
+.admin-trip-info{flex:1;min-width:0}
+.admin-trip-name{font-size:14px;font-weight:700;margin-bottom:2px}
+.admin-trip-meta{font-size:12px;color:var(--ink3)}
+.admin-del-btn{background:var(--red-light);color:var(--red);border:none;border-radius:8px;
+  padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -269,17 +284,20 @@ textarea.inp{resize:none;line-height:1.5}
 const API_URL='https://script.google.com/macros/s/AKfycbwHUQw1fmW_mCXwMEe2tM8SolZMBz-mzZMHr1F4iCxk-zQ4qfVia_Dm0udE8oj02dj5XQ/exec';
 
 const CATS=[
-  {id:'food',  label:'餐飲',  icon:'🍜', bg:'#fff7ed', color:'#c2410c'},
-  {id:'sight', label:'景點',  icon:'⛩️',  bg:'#f5f3ff', color:'#7c3aed'},
-  {id:'go',    label:'交通',  icon:'🚌', bg:'#f0fdf4', color:'#15803d'},
-  {id:'stay',  label:'住宿',  icon:'🏨', bg:'#eff6ff', color:'#1d4ed8'},
-  {id:'shop',  label:'購物',  icon:'🛍️', bg:'#fefce8', color:'#a16207'},
-  {id:'other', label:'其他',  icon:'💡', bg:'#f8fafc', color:'#475569'},
+  {id:'go',     label:'交通',   icon:'✈️',  bg:'#f0fdf4', color:'#15803d'},
+  {id:'stay',   label:'住宿',   icon:'🏨', bg:'#eff6ff', color:'#1d4ed8'},
+  {id:'food',   label:'餐飲',   icon:'🍜', bg:'#fff7ed', color:'#c2410c'},
+  {id:'sight',  label:'景點',   icon:'🎯', bg:'#f5f3ff', color:'#7c3aed'},
+  {id:'ticket', label:'票券預約',icon:'🎫', bg:'#fdf4ff', color:'#a21caf'},
+  {id:'shop',   label:'購物',   icon:'🛍️', bg:'#fefce8', color:'#a16207'},
+  {id:'free',   label:'自由時間',icon:'🏖️', bg:'#ecfdf5', color:'#059669'},
+  {id:'other',  label:'其他',   icon:'💡', bg:'#f8fafc', color:'#475569'},
 ];
 const catOf=id=>CATS.find(c=>c.id===id)||CATS[5];
 const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const KEY='itinerary_trips'; // localStorage key for trip list
+const KEY='itinerary_trips';
+const ADMIN_PIN='0325'; // localStorage key for trip list
 
 /* ─── state ─── */
 let trips=[];      // [{code,name,startDate,days}] — local index
@@ -287,7 +305,8 @@ let activePlan=null;
 let view='home';   // 'home' | 'trip'
 let tripTab='day'; // 'day' | 'overview'
 let currentDay=0;
-let overlay=null;  // null | 'create' | 'join' | 'spot-add' | 'spot-edit' | 'settings'
+let adminMode=false, adminTrips=[];
+let overlay=null;  // null | 'create' | 'join' | 'spot-add' | 'spot-edit' | 'settings' | 'admin-pin' | 'admin'
 let overlayCtx={};
 let pollingTimer=null;
 
@@ -506,6 +525,20 @@ function bindView(){
         activePlan=p; view='trip'; tripTab='day'; currentDay=0; startPoll(); render();
       };
     });
+    // admin login
+    document.getElementById('btn-admin-login')?.addEventListener('click',()=>{ overlay='admin-pin'; showOverlay(); });
+    // admin exit
+    document.getElementById('btn-admin-exit')?.addEventListener('click',()=>{ adminMode=false; adminTrips=[]; render(); });
+    // admin delete
+    document.querySelectorAll('.admin-del-btn').forEach(btn=>{
+      btn.addEventListener('click',async()=>{
+        const c=btn.dataset.code;
+        if(!confirm(`刪除行程 ${c}？此操作無法復原。`)) return;
+        const ok=await apiDelete(c, ADMIN_PIN);
+        if(ok){ toast('已刪除'); adminTrips=adminTrips.filter(t=>t.code.replace('PLAN_','')!==c); render(); }
+        else toast('刪除失敗');
+      });
+    });
   } else {
     document.getElementById('btn-back').onclick=()=>{ view='home'; activePlan=null; stopPoll(); render(); };
     document.getElementById('btn-code').onclick=()=>copyText(activePlan.code.replace('PLAN_',''));
@@ -531,7 +564,7 @@ function bindView(){
         const dayIdx=parseInt(btn.dataset.day); const sid=btn.dataset.sid;
         if(!confirm('刪除此景點？')) return;
         activePlan.days[dayIdx].spots=activePlan.days[dayIdx].spots.filter(s=>s.id!==sid);
-        apiSave(activePlan).then(()=>{ toast('已刪除'); render(); });
+        toast('已刪除'); render(); apiSave(activePlan);
       };
     });
   }
@@ -588,7 +621,7 @@ function joinSheetHTML(){
 function spotSheetHTML(){
   const editing=overlay==='spot-edit';
   const s=editing?overlayCtx.spot:{};
-  const selCat=s.cat||'sight';
+  const selCat=s.cat||'go';
   const grid=CATS.map(c=>`<button class="cat-btn${c.id===selCat?' on':''}" data-cat="${c.id}">
     <span>${c.icon}</span>${c.label}</button>`).join('');
   return `<div class="sheet-handle"></div>
@@ -611,6 +644,15 @@ function spotSheetHTML(){
 
 function bindOverlay(){
   document.getElementById('cancel-sheet')?.addEventListener('click',closeOverlay);
+  // admin pin
+  document.getElementById('do-admin-login')?.addEventListener('click',async()=>{
+    const pin=document.getElementById('f-pin').value.trim();
+    const errEl=document.getElementById('sheet-err');
+    if(pin!==ADMIN_PIN){ errEl.textContent='PIN 錯誤'; errEl.style.display='block'; return; }
+    const list=await apiList(pin);
+    if(!list){ errEl.textContent='載入失敗，請重試'; errEl.style.display='block'; return; }
+    adminMode=true; adminTrips=list; closeOverlay(); render();
+  });
   // settings
   document.getElementById('set-copy')?.addEventListener('click',()=>copyText(activePlan.code.replace('PLAN_','')));
   document.getElementById('set-delete')?.addEventListener('click',()=>{
@@ -671,7 +713,7 @@ function bindOverlay(){
     } else {
       activePlan.days[dayIdx].spots.push({id:uid(),name,time,note,cat:selCat});
     }
-    apiSave(activePlan).then(()=>{ toast(overlay==='spot-edit'?'已更新':'已新增'); closeOverlay(); render(); });
+    const _msg=overlay==='spot-edit'?'已更新':'已新增'; closeOverlay(); render(); toast(_msg); apiSave(activePlan);
   });
 
   /* delete from edit sheet */
@@ -679,11 +721,21 @@ function bindOverlay(){
     if(!confirm('刪除此景點？')) return;
     const dayIdx=overlayCtx.dayIdx;
     activePlan.days[dayIdx].spots=activePlan.days[dayIdx].spots.filter(s=>s.id!==overlayCtx.sid);
-    apiSave(activePlan).then(()=>{ toast('已刪除'); closeOverlay(); render(); });
+    toast('已刪除'); closeOverlay(); render(); apiSave(activePlan);
   });
 }
 
 
+
+function adminPinSheetHTML(){
+  return `<div class="sheet-handle"></div>
+  <div class="sheet-title">管理者登入</div>
+  <div id="sheet-err" class="err-msg" style="display:none"></div>
+  <div class="field"><label class="field-label">管理者 PIN</label>
+    <input class="inp center" id="f-pin" type="password" placeholder="••••" maxlength="8"/></div>
+  <button class="act-btn primary" id="do-admin-login">登入</button>
+  <button class="act-btn ghost" id="cancel-sheet">取消</button>`;
+}
 function settingsSheetHTML(){
   const c=activePlan.code.replace('PLAN_','');
   return `<div class="sheet-handle"></div>
