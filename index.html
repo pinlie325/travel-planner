@@ -167,7 +167,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f7f7f5;color:#1a1
 
 <script>
 // ====== 填入你的 Apps Script 網址 ======
-var API_URL = 'https://script.google.com/macros/s/AKfycbxurTX-uyVSsPcSzi1ZUb4aJJ4RTKsC1WXnY50VtleZG3gn9nLn9520f_Pncu_nrJHckQ/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbxurTX-uyVSsPcSzi1ZUb4aJJ4RTKsC1WXnY50VtIeZG3gn9nLn9520f_Pncu_nrJHckQ/exec';
 
 var D = {events:[],spots:[],budget:[]};
 var editMode = false;
@@ -195,20 +195,42 @@ var PACK = [
   {section:'其他',items:['環保袋','小錢包','墨鏡','帽子','換洗袋','行李秤','哨子（孩子用）']},
 ];
 
-// ─── API（用 fetch GET，Apps Script 支援跨域讀取）───
+// ─── API（JSONP 繞過 CORS）───
 function callAPI(params) {
-  var qs = Object.keys(params).map(function(k){
-    return k + '=' + encodeURIComponent(
-      typeof params[k] === 'object' ? JSON.stringify(params[k]) : params[k]
-    );
-  }).join('&');
-  return fetch(API_URL + '?' + qs)
-    .then(function(r){ return r.json(); });
+  return new Promise(function(resolve, reject) {
+    var cbName = '_cb' + Date.now() + Math.floor(Math.random()*9999);
+    var script = document.createElement('script');
+    var timer = setTimeout(function(){
+      delete window[cbName];
+      if(document.body.contains(script)) document.body.removeChild(script);
+      reject(new Error('timeout'));
+    }, 15000);
+    window[cbName] = function(res) {
+      clearTimeout(timer);
+      delete window[cbName];
+      if(document.body.contains(script)) document.body.removeChild(script);
+      resolve(res);
+    };
+    var qs = 'callback=' + cbName;
+    Object.keys(params).forEach(function(k){
+      qs += '&' + k + '=' + encodeURIComponent(
+        typeof params[k] === 'object' ? JSON.stringify(params[k]) : String(params[k])
+      );
+    });
+    script.src = API_URL + '?' + qs;
+    script.onerror = function(){
+      clearTimeout(timer);
+      delete window[cbName];
+      if(document.body.contains(script)) document.body.removeChild(script);
+      reject(new Error('script load error'));
+    };
+    document.body.appendChild(script);
+  });
 }
 
 function api(action, payload) {
   var params = Object.assign({ action: action }, payload || {});
-  callAPI(params).catch(function(){}); // 本地已更新，背景儲存
+  callAPI(params).catch(function(){});
   return Promise.resolve({ ok: true });
 }
 
