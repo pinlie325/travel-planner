@@ -1,10 +1,15 @@
+<!--
+  一起GO（原名：行程趣） V2_6（2026-10-06）
+  - 程式改名為「一起GO」：網頁標題、Logo、PDF 報表頁尾
+  後端沿用 行程趣GAS-V2_2_新增管理者列表刪除.js
+-->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="theme-color" content="#1a1a2e"/>
-<title>行程趣</title>
+<title>一起GO</title>
 <style>
 :root{
   --bg:#f7f7f9;
@@ -275,6 +280,12 @@ textarea.inp{resize:none;line-height:1.5}
 .admin-trip-meta{font-size:12px;color:var(--ink3)}
 .admin-del-btn{background:var(--red-light);color:var(--red);border:none;border-radius:8px;
   padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+.admin-trip-card{cursor:pointer}
+.admin-trip-meta b{color:var(--ink);font-weight:700}
+.admin-trip-meta .unk{color:var(--ink3);font-style:italic}
+.admin-link{background:none;border:none;color:var(--ink3);font-size:12px;font-weight:700;
+  cursor:pointer;font-family:inherit;padding:6px 4px}
+.topbar{justify-content:space-between}
 </style>
 </head>
 <body>
@@ -297,7 +308,7 @@ const catOf=id=>CATS.find(c=>c.id===id)||CATS[5];
 const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KEY='itinerary_trips';
-const ADMIN_PIN='0325'; // localStorage key for trip list
+const NAME_KEY='itinerary_myname'; // 記住建立者暱稱
 
 /* ─── state ─── */
 let trips=[];      // [{code,name,startDate,days}] — local index
@@ -305,7 +316,7 @@ let activePlan=null;
 let view='home';   // 'home' | 'trip'
 let tripTab='day'; // 'day' | 'overview'
 let currentDay=0;
-let adminMode=false, adminTrips=[];
+let adminMode=false, adminTrips=[], adminPin='';
 let overlay=null;  // null | 'create' | 'join' | 'spot-add' | 'spot-edit' | 'settings' | 'admin-pin' | 'admin'
 let overlayCtx={};
 let pollingTimer=null;
@@ -337,6 +348,17 @@ async function apiLoad(c){
 }
 async function apiSave(p){
   return fetch(API_URL,{method:'POST',body:JSON.stringify(p)});
+}
+async function apiAdmin(body){
+  try{
+    const r=await fetch(API_URL,{method:'POST',body:JSON.stringify(body)});
+    return await r.json();
+  }catch(e){ return {ok:false,error:'network'}; }
+}
+async function apiList(pin){ return apiAdmin({action:'list',pin}); }
+async function apiDelete(c,pin){
+  const d=await apiAdmin({action:'delete',pin,code:'PLAN_'+c});
+  return !!(d&&d.ok);
 }
 
 /* ─── poll ─── */
@@ -376,9 +398,9 @@ function dayDate(startDate,idx){
   const d=new Date(startDate); d.setDate(d.getDate()+idx);
   return d.toLocaleDateString('zh-Hant',{month:'numeric',day:'numeric',weekday:'short'});
 }
-function newPlan(c,name,startDate,days){
+function newPlan(c,name,startDate,days,creator){
   return {
-    code:'PLAN_'+c, name, startDate:startDate||null,
+    code:'PLAN_'+c, name, startDate:startDate||null, creator:creator||'',
     days:Array.from({length:days},(_,i)=>({id:uid(),dayIndex:i,spots:[]})),
     createdAt:Date.now()
   };
@@ -393,7 +415,38 @@ function render(){
 }
 
 /* ─── home ─── */
+function fmtDT(v){
+  if(!v) return '—';
+  const d=new Date(v); if(isNaN(d)) return '—';
+  return d.toLocaleDateString('zh-Hant',{year:'numeric',month:'numeric',day:'numeric'})+' '+
+    d.toLocaleTimeString('zh-Hant',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function adminHTML(){
+  const list=adminTrips.length===0
+    ? `<div class="empty-state"><div class="icon">📭</div><div class="t">雲端沒有任何行程</div></div>`
+    : adminTrips.map(t=>{
+        const c=String(t.code||'').replace('PLAN_','');
+        const who=t.creator?`<b>${esc(t.creator)}</b>`:`<span class="unk">未記錄（舊行程）</span>`;
+        return `<div class="admin-trip-card" data-code="${esc(c)}">
+          <div class="admin-trip-info">
+            <div class="admin-trip-name">${esc(t.name||'（未命名）')}　<span style="color:var(--ink3);font-weight:600">${esc(c)}</span></div>
+            <div class="admin-trip-meta">建立者：${who}</div>
+            <div class="admin-trip-meta">建立：${fmtDT(t.createdAt||t.fileCreated)}　最後修改：${fmtDT(t.updated)}</div>
+            <div class="admin-trip-meta">${t.days||0} 天・${t.spots||0} 個景點${t.startDate?'・'+esc(t.startDate)+' 出發':''}</div>
+          </div>
+          <button class="admin-del-btn" data-code="${esc(c)}">刪除</button>
+        </div>`;
+      }).join('');
+  return `
+  <div class="admin-bar"><span><span class="admin-badge">管理者</span>　所有行程（${adminTrips.length}）</span>
+    <button class="admin-exit" id="btn-admin-exit">離開</button></div>
+  <div class="home-body">
+    <div class="section-label">點卡片可查看內容</div>
+    ${list}
+  </div>`;
+}
 function homeHTML(){
+  if(adminMode) return adminHTML();
   const cards = trips.length===0
     ? `<div class="empty-state">
         <div class="icon">🗺️</div>
@@ -421,7 +474,8 @@ function homeHTML(){
 
   return `
   <div class="topbar">
-    <div class="topbar-logo">行程<span>趣</span></div>
+    <div class="topbar-logo">一起<span>GO</span></div>
+    <button class="admin-link" id="btn-admin-login">管理</button>
   </div>
   <div class="home-body">
     ${trips.length>0?`<div class="section-label">我的行程</div>`:''}
@@ -515,8 +569,8 @@ function spotCardHTML(s,dayIdx){
 /* ═══════════════ BIND ═══════════════ */
 function bindView(){
   if(view==='home'){
-    document.getElementById('fab-create').onclick=()=>{ overlay='create'; overlayCtx={}; showOverlay(); };
-    document.getElementById('fab-join').onclick=()=>{ overlay='join'; overlayCtx={}; showOverlay(); };
+    const fc=document.getElementById('fab-create'); if(fc) fc.onclick=()=>{ overlay='create'; overlayCtx={}; showOverlay(); };
+    const fj=document.getElementById('fab-join'); if(fj) fj.onclick=()=>{ overlay='join'; overlayCtx={}; showOverlay(); };
     document.querySelectorAll('.trip-card').forEach(el=>{
       el.onclick=async()=>{
         const c=el.dataset.code;
@@ -528,14 +582,25 @@ function bindView(){
     // admin login
     document.getElementById('btn-admin-login')?.addEventListener('click',()=>{ overlay='admin-pin'; showOverlay(); });
     // admin exit
-    document.getElementById('btn-admin-exit')?.addEventListener('click',()=>{ adminMode=false; adminTrips=[]; render(); });
+    document.getElementById('btn-admin-exit')?.addEventListener('click',()=>{ adminMode=false; adminTrips=[]; adminPin=''; render(); });
+    // admin open (view only, not added to my list)
+    document.querySelectorAll('.admin-trip-card').forEach(el=>{
+      el.addEventListener('click',async e=>{
+        if(e.target.closest('.admin-del-btn')) return;
+        const p=await apiLoad(el.dataset.code).catch(()=>null);
+        if(!p){ toast('讀取失敗'); return; }
+        activePlan=p; view='trip'; tripTab='day'; currentDay=0; startPoll(); render();
+      });
+    });
     // admin delete
     document.querySelectorAll('.admin-del-btn').forEach(btn=>{
-      btn.addEventListener('click',async()=>{
+      btn.addEventListener('click',async e=>{
+        e.stopPropagation();
         const c=btn.dataset.code;
-        if(!confirm(`刪除行程 ${c}？此操作無法復原。`)) return;
-        const ok=await apiDelete(c, ADMIN_PIN);
-        if(ok){ toast('已刪除'); adminTrips=adminTrips.filter(t=>t.code.replace('PLAN_','')!==c); render(); }
+        const t=adminTrips.find(x=>String(x.code).replace('PLAN_','')===c)||{};
+        if(!confirm(`刪除行程「${t.name||c}」（${c}）？\n建立者：${t.creator||'未記錄'}\n\n檔案會移到 Google 雲端硬碟的垃圾桶，30 天內可從垃圾桶救回。`)) return;
+        const ok=await apiDelete(c, adminPin);
+        if(ok){ toast('已刪除'); adminTrips=adminTrips.filter(x=>String(x.code).replace('PLAN_','')!==c); removeFromIndex(c); render(); }
         else toast('刪除失敗');
       });
     });
@@ -577,6 +642,7 @@ function showOverlay(){
   else if(overlay==='join') html=joinSheetHTML();
   else if(overlay==='spot-add'||overlay==='spot-edit') html=spotSheetHTML();
   else if(overlay==='settings') html=settingsSheetHTML();
+  else if(overlay==='admin-pin') html=adminPinSheetHTML();
 
   const wrap=document.createElement('div');
   wrap.className='overlay'; wrap.id='overlay';
@@ -598,6 +664,8 @@ function createSheetHTML(){
   <div id="sheet-err" class="err-msg" style="display:none"></div>
   <div class="field"><label class="field-label">行程名稱</label>
     <input class="inp" id="f-name" placeholder="例：沖繩五天四夜" maxlength="40"/></div>
+  <div class="field"><label class="field-label">你的暱稱（建立者）</label>
+    <input class="inp" id="f-creator" placeholder="例：小明" maxlength="20" value="${esc((()=>{try{return localStorage.getItem(NAME_KEY)||'';}catch{return '';}})())}"/></div>
   <div class="field"><label class="field-label">出發日期（選填）</label>
     <input class="inp" id="f-date" type="date"/></div>
   <div class="field"><label class="field-label">共幾天</label>
@@ -648,13 +716,43 @@ function bindOverlay(){
   document.getElementById('do-admin-login')?.addEventListener('click',async()=>{
     const pin=document.getElementById('f-pin').value.trim();
     const errEl=document.getElementById('sheet-err');
-    if(pin!==ADMIN_PIN){ errEl.textContent='PIN 錯誤'; errEl.style.display='block'; return; }
-    const list=await apiList(pin);
-    if(!list){ errEl.textContent='載入失敗，請重試'; errEl.style.display='block'; return; }
-    adminMode=true; adminTrips=list; closeOverlay(); render();
+    if(!pin){ errEl.textContent='請輸入 PIN'; errEl.style.display='block'; return; }
+    const btn=document.getElementById('do-admin-login'); btn.disabled=true; btn.textContent='載入中…';
+    const d=await apiList(pin);
+    btn.disabled=false; btn.textContent='登入';
+    if(!d||!d.ok){ errEl.textContent=(d&&d.error==='bad pin')?'PIN 錯誤':'載入失敗，請確認後端已更新並重新部署'; errEl.style.display='block'; return; }
+    adminMode=true; adminPin=pin;
+    adminTrips=(d.plans||[]).sort((a,b)=>String(b.updated||'').localeCompare(String(a.updated||'')));
+    closeOverlay(); render();
   });
   // settings
   document.getElementById('set-copy')?.addEventListener('click',()=>copyText(activePlan.code.replace('PLAN_','')));
+
+  // PDF 行程報表
+  document.getElementById('set-pdf')?.addEventListener('click',exportPDF);
+
+  // 複製 AI 指令
+  document.getElementById('set-ai-copy')?.addEventListener('click',()=>{
+    const t=aiPromptText();
+    navigator.clipboard?.writeText(t).then(()=>toast('已複製指令，貼到 AI 對話框')).catch(()=>fbCopy(t));
+  });
+
+  // 修改建立者
+  document.getElementById('set-creator-btn')?.addEventListener('click',()=>{
+    const area=document.getElementById('creator-area');
+    area.style.display=area.style.display==='none'?'block':'none';
+    if(area.style.display==='block') document.getElementById('f-creator-edit').focus();
+  });
+  document.getElementById('set-creator-do')?.addEventListener('click',()=>{
+    const v=document.getElementById('f-creator-edit').value.trim();
+    if(!v){ toast('請輸入名稱'); return; }
+    activePlan.creator=v;
+    apiSave(activePlan);
+    document.getElementById('creator-sub').textContent=v;
+    document.getElementById('creator-area').style.display='none';
+    const t=adminTrips.find(x=>x.code===activePlan.code); if(t) t.creator=v;
+    toast('已更新建立者');
+  });
 
   // 匯出
   document.getElementById('set-export')?.addEventListener('click',()=>{
@@ -677,14 +775,19 @@ function bindOverlay(){
     const errEl=document.getElementById('import-err');
     errEl.style.display='none';
     let parsed;
-    try{ parsed=JSON.parse(raw); }
+    const txt=raw.replace(/^```(?:json)?\s*/i,'').replace(/\s*```\s*$/,'');
+    try{ parsed=JSON.parse(txt); }
     catch(e){ errEl.textContent='JSON 格式錯誤，請確認內容'; errEl.style.display='block'; return; }
     // 驗證基本結構
     if(!parsed.days||!Array.isArray(parsed.days)){
       errEl.textContent='格式不符，缺少 days 欄位'; errEl.style.display='block'; return;
     }
     // 保留目前的 code，其餘覆蓋
+    cleanImport(parsed);
+    if(!parsed.name) parsed.name=activePlan.name;
     parsed.code=activePlan.code;
+    if(activePlan.creator&&!parsed.creator) parsed.creator=activePlan.creator;
+    if(activePlan.createdAt&&!parsed.createdAt) parsed.createdAt=activePlan.createdAt;
     activePlan=parsed;
     addToIndex(parsed);
     apiSave(activePlan);
@@ -702,11 +805,14 @@ function bindOverlay(){
     const name=document.getElementById('f-name').value.trim();
     const date=document.getElementById('f-date').value;
     const days=parseInt(document.getElementById('f-days').value)||4;
+    const creator=document.getElementById('f-creator').value.trim();
     const errEl=document.getElementById('sheet-err');
     if(!name){ errEl.textContent='請輸入行程名稱'; errEl.style.display='block'; return; }
+    if(!creator){ errEl.textContent='請輸入你的暱稱'; errEl.style.display='block'; return; }
+    try{ localStorage.setItem(NAME_KEY,creator); }catch{}
     if(days<1||days>30){ errEl.textContent='天數請填 1～30'; errEl.style.display='block'; return; }
     const c=Math.random().toString(36).slice(2,6).toUpperCase();
-    const p=newPlan(c,name,date||null,days);
+    const p=newPlan(c,name,date||null,days,creator);
     await apiSave(p);
     addToIndex(p); activePlan=p;
     closeOverlay(); showCodeModal(c);
@@ -782,13 +888,25 @@ function settingsSheetHTML(){
     <button class="act-btn primary" id="set-copy" style="width:auto;margin:0;padding:10px 18px;font-size:14px">${c} 複製</button>
   </div>
   <div class="setting-row">
+    <div><div class="setting-label">建立者</div>
+    <div class="setting-sub" id="creator-sub">${esc(activePlan.creator||'未記錄')}</div></div>
+    <button class="act-btn ghost" id="set-creator-btn" style="width:auto;margin:0;padding:10px 18px;font-size:14px">✏️ 修改</button>
+  </div>
+  <div id="creator-area" style="display:none;margin-top:4px">
+    <input class="inp" id="f-creator-edit" maxlength="20" placeholder="輸入建立者名稱" value="${esc(activePlan.creator||'')}"/>
+    <button class="act-btn primary" id="set-creator-do" style="margin-top:8px">儲存建立者</button>
+  </div>
+  <div class="setting-row">
     <div><div class="setting-label">行程天數</div>
     <div class="setting-sub">共 ${activePlan.days.length} 天</div></div>
   </div>
   <div class="setting-row">
     <div><div class="setting-label">匯出行程</div>
-    <div class="setting-sub">下載 JSON 檔，可備份或給 AI 整理</div></div>
-    <button class="act-btn ghost" id="set-export" style="width:auto;margin:0;padding:10px 18px;font-size:14px">📥 匯出</button>
+    <div class="setting-sub">JSON 備份匯入／PDF 行程報表</div></div>
+    <div style="display:flex;gap:6px;flex-shrink:0">
+      <button class="act-btn ghost" id="set-export" style="width:auto;margin:0;padding:10px 12px;font-size:13px">📥 JSON</button>
+      <button class="act-btn ghost" id="set-pdf" style="width:auto;margin:0;padding:10px 12px;font-size:13px">📄 PDF</button>
+    </div>
   </div>
   <div class="setting-row">
     <div><div class="setting-label">匯入行程</div>
@@ -796,6 +914,13 @@ function settingsSheetHTML(){
     <button class="act-btn ghost" id="set-import-btn" style="width:auto;margin:0;padding:10px 18px;font-size:14px">📤 匯入</button>
   </div>
   <div id="import-area" style="display:none;margin-top:4px">
+    <div style="background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:12.5px;line-height:1.8;color:var(--ink2)">
+      <b>步驟</b><br>
+      ① 按下方「複製給 AI 的指令」<br>
+      ② 打開 ChatGPT／Gemini／Claude，貼上指令，接著貼上你的行程（文字、表格、截圖都可以）<br>
+      ③ 複製 AI 回覆的 JSON，貼到下面的框，按「確認匯入」
+    </div>
+    <button class="act-btn ghost" id="set-ai-copy" style="margin:0 0 10px">📋 複製給 AI 的指令</button>
     <textarea class="inp" id="import-json" rows="5" placeholder='貼上 JSON 內容...' style="font-size:13px;font-family:monospace"></textarea>
     <div id="import-err" class="err-msg" style="display:none"></div>
     <button class="act-btn primary" id="set-import-do" style="margin-top:4px">確認匯入</button>
@@ -804,6 +929,125 @@ function settingsSheetHTML(){
     <button class="act-btn danger" id="set-delete">從裝置移除此行程</button>
     <button class="act-btn ghost" id="cancel-sheet">關閉</button>
   </div>`;
+}
+/* ─── PDF 行程報表 ─── */
+function reportHTML(p){
+  const fmt=(d,o)=>d.toLocaleDateString('zh-Hant',o);
+  const start=p.startDate?new Date(p.startDate):null;
+  let end=null; if(start){ end=new Date(start); end.setDate(end.getDate()+p.days.length-1); }
+  const range=start?fmt(start,{year:'numeric',month:'numeric',day:'numeric'})+' ～ '+fmt(end,{month:'numeric',day:'numeric'}):'未設定日期';
+  const total=p.days.reduce((n,d)=>n+(d.spots||[]).length,0);
+  const days=p.days.map((d,i)=>{
+    const dd=dayDate(p.startDate,i);
+    const rows=(d.spots||[]).length===0
+      ?`<tr><td colspan="4" class="empty">尚無安排</td></tr>`
+      :[...d.spots].sort((a,b)=>(a.time||'99').localeCompare(b.time||'99')).map(s=>{
+        const c=catOf(s.cat);
+        return `<tr><td class="t">${esc(s.time||'—')}</td>
+          <td class="c"><span style="background:${c.bg};color:${c.color}">${c.icon} ${c.label}</span></td>
+          <td class="n">${esc(s.name||'（未命名）')}</td>
+          <td class="note">${esc(s.note||'').replace(/\n/g,'<br>')}</td></tr>`;
+      }).join('');
+    return `<section class="day"><h2>DAY ${i+1}${dd?`<small>${dd}</small>`:''}</h2>
+      <table><thead><tr><th style="width:52px">時間</th><th style="width:96px">類型</th><th style="width:30%">行程</th><th>備註</th></tr></thead>
+      <tbody>${rows}</tbody></table></section>`;
+  }).join('');
+  const now=new Date();
+  return `<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(p.name)}_行程表</title>
+<style>
+@page{size:A4;margin:14mm 12mm}
+*{box-sizing:border-box}
+body{font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;color:#1e293b;margin:0;padding:20px;font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+header{border-bottom:3px solid #2563eb;padding-bottom:10px;margin-bottom:16px}
+h1{font-size:22px;margin:0 0 6px}
+.meta{color:#64748b;font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16px}
+.day{margin-bottom:16px;break-inside:avoid;page-break-inside:avoid}
+h2{font-size:14px;color:#2563eb;margin:0 0 6px;display:flex;gap:10px;align-items:baseline}
+h2 small{color:#64748b;font-size:12px;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{background:#f1f5f9;text-align:left;font-size:11px;color:#475569;padding:6px 8px;border-bottom:1px solid #e2e8f0}
+td{padding:7px 8px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+td.t{font-weight:700;white-space:nowrap}
+td.c span{display:inline-block;border-radius:5px;padding:1px 6px;font-size:11px;font-weight:700;white-space:nowrap}
+td.n{font-weight:700}
+td.note{color:#475569}
+td.empty{color:#94a3b8;text-align:center}
+footer{margin-top:20px;color:#94a3b8;font-size:10px;text-align:right}
+.bar{position:sticky;top:0;background:#fff;padding:10px 0;margin:-20px 0 12px;display:flex;gap:8px;border-bottom:1px solid #e2e8f0}
+.bar button{font:inherit;font-size:14px;font-weight:700;border:none;border-radius:10px;padding:10px 18px;cursor:pointer}
+.bar .p{background:#2563eb;color:#fff}.bar .x{background:#f1f5f9;color:#334155}
+@media print{.bar{display:none}body{padding:0}}
+</style></head><body>
+<div class="bar"><button class="p" onclick="window.print()">🖨️ 列印／另存 PDF</button><button class="x" onclick="window.close()">關閉</button></div>
+<header><h1>${esc(p.name)}</h1>
+<div class="meta"><span>📅 ${range}</span><span>🗓️ 共 ${p.days.length} 天・${total} 個行程</span>
+${p.creator?`<span>👤 建立者：${esc(p.creator)}</span>`:''}<span>🔑 代碼：${esc(p.code.replace('PLAN_',''))}</span></div></header>
+${days}
+<footer>一起GO・${fmt(now,{year:'numeric',month:'numeric',day:'numeric'})} 產生</footer>
+</body></html>`;
+}
+function exportPDF(){
+  const w=window.open('','_blank');
+  if(!w){ toast('請允許彈出視窗後再試'); return; }
+  w.document.open(); w.document.write(reportHTML(activePlan)); w.document.close();
+  setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} },500);
+}
+
+/* ─── AI 指令 ─── */
+function aiPromptText(){
+  const p=activePlan||{};
+  const cats=CATS.map(c=>c.id+'＝'+c.label).join('、');
+  return [
+'請把我接下來提供的旅遊行程，整理成下面這個 JSON 格式。只回覆 JSON 本身，不要任何說明文字。',
+'',
+'【目前行程資訊】',
+'行程名稱：'+(p.name||''),
+'出發日期：'+(p.startDate||'未設定'),
+'天數：'+((p.days||[]).length||'依行程內容'),
+'',
+'【格式】',
+'{',
+'  "name": "行程名稱",',
+'  "startDate": "YYYY-MM-DD（第一天的日期，沒有就填 null）",',
+'  "days": [',
+'    {',
+'      "dayIndex": 0,',
+'      "spots": [',
+'        { "time": "09:00", "cat": "go", "name": "桃園機場 → 新加坡樟宜", "note": "CI753 08:00 起飛" }',
+'      ]',
+'    }',
+'  ]',
+'}',
+'',
+'【規則】',
+'1. days 依天數排列，第一天 dayIndex 為 0，第二天為 1，依此類推；沒有安排的日子也要保留，spots 給空陣列 []。',
+'2. time 用 24 小時制 HH:MM，只能是整點或半點（例如 09:00、13:30），時間不是剛好整點/半點就取最接近的；沒有時間就填 ""。',
+'3. 同一天的 spots 依時間先後排序。',
+'4. cat 只能用以下代碼：'+cats+'。',
+'   飛機、車、船、步行移動用 go；飯店入住退房用 stay；吃飯用 food；景點參觀用 sight；門票、預約、取票用 ticket；逛街採買用 shop；自由活動用 free；其他用 other。',
+'5. name 寫簡短標題（20 字內）；地址、班機、訂位代號、交通方式、提醒等細節放 note。',
+'6. 不要捏造我沒提供的資訊。',
+'',
+'以下是我的行程：',
+''
+  ].join('\n');
+}
+function cleanImport(parsed){
+  const ids=CATS.map(c=>c.id);
+  parsed.days=(parsed.days||[]).map((d,i)=>({
+    id:d.id||uid(), dayIndex:i,
+    spots:(Array.isArray(d.spots)?d.spots:[]).map(sp=>({
+      id:sp.id||uid(),
+      time:String(sp.time||''),
+      cat:ids.includes(sp.cat)?sp.cat:'other',
+      name:String(sp.name||''),
+      note:String(sp.note||'')
+    }))
+  }));
+  if(parsed.startDate==='') parsed.startDate=null;
+  return parsed;
 }
 /* ─── code modal ─── */
 function showCodeModal(c){
