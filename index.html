@@ -9,7 +9,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="theme-color" content="#1a1a2e"/>
-<title>行程趣</title>
+<title>一起GO</title>
 <style>
 :root{
   --bg:#f7f7f9;
@@ -482,7 +482,7 @@ function homeHTML(){
 
   return `
   <div class="topbar">
-    <div class="topbar-logo">行程<span>趣</span></div>
+    <div class="topbar-logo">一起<span>GO</span></div>
     <button class="admin-link" id="btn-admin-login">管理</button>
   </div>
   <div class="home-body">
@@ -1026,7 +1026,7 @@ footer{margin-top:20px;color:#94a3b8;font-size:10px;text-align:right}
 <div class="meta"><span>📅 ${range}</span><span>🗓️ 共 ${p.days.length} 天・${total} 個行程</span>
 ${p.creator?`<span>👤 建立者：${esc(p.creator)}</span>`:''}<span>🔑 代碼：${esc(p.code.replace('PLAN_',''))}</span></div></header>
 ${days}
-<footer>行程趣・${fmt(now,{year:'numeric',month:'numeric',day:'numeric'})} 產生</footer>
+<footer>一起GO・${fmt(now,{year:'numeric',month:'numeric',day:'numeric'})} 產生</footer>
 </body></html>`;
 }
 function exportPDF(){
