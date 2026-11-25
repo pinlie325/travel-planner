@@ -254,6 +254,52 @@ textarea.inp{resize:none;line-height:1.5}
   color:var(--ink3);padding:14px 0 12px;border-bottom:2px solid transparent;
   transition:color .15s,border-color .15s;letter-spacing:.3px;cursor:pointer}
 .tab-btn.on{color:var(--accent);border-bottom-color:var(--accent)}
+/* ── baggage ── */
+.bag-section{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.bag-person-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
+.bag-person-name{font-size:15px;font-weight:700;color:var(--ink)}
+.bag-del-person{background:none;border:none;color:var(--ink3);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:6px}
+.bag-del-person:active{background:var(--red-light);color:var(--red)}
+.bag-items{padding:8px 14px 4px}
+.bag-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)}
+.bag-item:last-child{border-bottom:none}
+.bag-check{width:20px;height:20px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.bag-item-label{flex:1;font-size:14px;color:var(--ink);line-height:1.4}
+.bag-item-label.done{text-decoration:line-through;color:var(--ink3)}
+.bag-del-item{background:none;border:none;color:var(--ink3);font-size:16px;cursor:pointer;padding:2px 6px;border-radius:6px;flex-shrink:0}
+.bag-del-item:active{background:var(--red-light);color:var(--red)}
+.bag-add-row{display:flex;gap:8px;padding:10px 14px 12px}
+.bag-add-inp{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;font-family:inherit;background:var(--bg2);color:var(--ink)}
+.bag-add-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.bag-add-person-row{display:flex;gap:8px;margin-bottom:14px}
+.bag-add-person-inp{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink)}
+.bag-add-person-btn{background:var(--sea,#0b6e69);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.bag-empty{text-align:center;color:var(--ink3);padding:32px 0;font-size:14px}
+.bag-progress{font-size:12px;color:var(--ink3);font-weight:600}
+/* ── todo ── */
+.todo-section{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.todo-person-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
+.todo-person-name{font-size:15px;font-weight:700;color:var(--ink)}
+.todo-del-person{background:none;border:none;color:var(--ink3);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:6px}
+.todo-del-person:active{background:var(--red-light);color:var(--red)}
+.todo-items{padding:8px 14px 4px}
+.todo-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)}
+.todo-item:last-child{border-bottom:none}
+.todo-check{width:20px;height:20px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.todo-item-label{flex:1;font-size:14px;color:var(--ink);line-height:1.4}
+.todo-item-label.done{text-decoration:line-through;color:var(--ink3)}
+.todo-del-item{background:none;border:none;color:var(--ink3);font-size:16px;cursor:pointer;padding:2px 6px;border-radius:6px;flex-shrink:0}
+.todo-del-item:active{background:var(--red-light);color:var(--red)}
+.todo-add-row{display:flex;gap:8px;padding:10px 14px 12px}
+.todo-add-inp{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;font-family:inherit;background:var(--bg2);color:var(--ink)}
+.todo-add-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.todo-add-person-row{display:flex;gap:8px;margin-bottom:14px}
+.todo-add-person-inp{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink)}
+.todo-add-person-btn{background:var(--sea,#0b6e69);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.todo-empty{text-align:center;color:var(--ink3);padding:32px 0;font-size:14px}
+.todo-progress{font-size:12px;color:var(--ink3);font-weight:600}
+
+
 .setting-row{display:flex;align-items:center;justify-content:space-between;
   padding:16px 0;border-bottom:1px solid var(--line)}
 .setting-row:last-child{border-bottom:none}
@@ -325,7 +371,7 @@ const NAME_KEY='itinerary_myname'; // 記住建立者暱稱
 let trips=[];      // [{code,name,startDate,days}] — local index
 let activePlan=null;
 let view='home';   // 'home' | 'trip'
-let tripTab='day'; // 'day' | 'overview'
+let tripTab='day'; // 'day' | 'overview' | 'bag' | 'todo'
 let currentDay=0;
 let adminMode=false, adminTrips=[], adminPin='';
 let overlay=null;  // null | 'create' | 'join' | 'spot-add' | 'spot-edit' | 'settings' | 'admin-pin' | 'admin'
@@ -506,6 +552,8 @@ function tripHTML(){
   const tabBar=`<div class="tab-bar">
     <button class="tab-btn ${tripTab==='day'?'on':''}" id="tab-day">📅 日行程</button>
     <button class="tab-btn ${tripTab==='overview'?'on':''}" id="tab-ov">📋 行程總覽</button>
+    <button class="tab-btn ${tripTab==='bag'?'on':''}" id="tab-bag">🧳 行李</button>
+    <button class="tab-btn ${tripTab==='todo'?'on':''}" id="tab-todo">✅ 待辦</button>
   </div>`;
   const dayNav=`<div class="day-nav">
     <button class="day-nav-arrow" id="day-prev" ${currentDay===0?'disabled':''}>‹</button>
@@ -515,7 +563,7 @@ function tripHTML(){
     </div>
     <button class="day-nav-arrow" id="day-next" ${currentDay===p.days.length-1?'disabled':''}>›</button>
   </div>`;
-  const body=tripTab==='day'?dayTabHTML():overviewHTML();
+  const body=tripTab==='day'?dayTabHTML():tripTab==='bag'?bagTabHTML():tripTab==='todo'?todoTabHTML():overviewHTML();
   return `
   <div class="app-topbar">
     <button class="back-btn" id="btn-back">←</button>
@@ -528,6 +576,202 @@ function tripHTML(){
   ${tabBar}
   ${tripTab==='day'?dayNav:''}
   <div class="app-body">${body}</div>`;
+}
+
+
+/* ── BAG HELPERS ── */
+function bagKey(){ return 'BAG_'+(activePlan.code||''); }
+function loadBag(){
+  try{ return JSON.parse(localStorage.getItem(bagKey())||'[]'); }catch(e){ return []; }
+}
+function saveBag(data){ try{ localStorage.setItem(bagKey(),JSON.stringify(data)); }catch(e){} }
+
+function bagTabHTML(){
+  const people=loadBag(); // [{name, items:[{id,text,done}]}]
+  const addPersonRow=`<div class="bag-add-person-row">
+    <input class="bag-add-person-inp" id="bag-new-person" placeholder="新增成員（例：媽媽包、李平烈）" maxlength="20"/>
+    <button class="bag-add-person-btn" id="bag-add-person-btn">＋ 新增</button>
+  </div>`;
+  if(people.length===0){
+    return addPersonRow+`<div class="bag-empty">👆 先新增成員，再幫每個人建行李清單</div>`;
+  }
+  const sections=people.map((person,pi)=>{
+    const done=person.items.filter(it=>it.done).length;
+    const total=person.items.length;
+    const progress=total>0?`${done}/${total} 已完成`:'';
+    const items=person.items.map((it,ii)=>`
+      <div class="bag-item">
+        <input type="checkbox" class="bag-check" data-pi="${pi}" data-ii="${ii}" ${it.done?'checked':''}>
+        <span class="bag-item-label ${it.done?'done':''}">${esc(it.text)}</span>
+        <button class="bag-del-item" data-del-item="${pi}-${ii}">✕</button>
+      </div>`).join('');
+    return `<div class="bag-section">
+      <div class="bag-person-header">
+        <span class="bag-person-name">👤 ${esc(person.name)}</span>
+        <span class="bag-progress">${progress}</span>
+        <button class="bag-del-person" data-del-person="${pi}" title="刪除此成員">🗑</button>
+      </div>
+      <div class="bag-items">${items||'<div style="color:var(--ink3);font-size:13px;padding:8px 0">尚未新增行李項目</div>'}</div>
+      <div class="bag-add-row">
+        <input class="bag-add-inp" data-add-inp="${pi}" placeholder="新增行李項目…" maxlength="40"/>
+        <button class="bag-add-btn" data-add-btn="${pi}">新增</button>
+      </div>
+    </div>`;
+  }).join('');
+  return addPersonRow+sections;
+}
+
+function bindBag(){
+  const people=loadBag();
+  // add person
+  document.getElementById('bag-add-person-btn')?.addEventListener('click',()=>{
+    const inp=document.getElementById('bag-new-person');
+    const name=(inp?.value||'').trim();
+    if(!name) return;
+    people.push({name,items:[]});
+    saveBag(people);
+    render();
+  });
+  document.getElementById('bag-new-person')?.addEventListener('keydown',e=>{
+    if(e.key==='Enter') document.getElementById('bag-add-person-btn')?.click();
+  });
+  // del person
+  document.querySelectorAll('[data-del-person]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const pi=parseInt(btn.dataset.delPerson);
+      if(!confirm(`刪除「${people[pi]?.name}」的行李清單？`)) return;
+      people.splice(pi,1); saveBag(people); render();
+    });
+  });
+  // checkbox
+  document.querySelectorAll('.bag-check').forEach(cb=>{
+    cb.addEventListener('change',()=>{
+      const pi=parseInt(cb.dataset.pi), ii=parseInt(cb.dataset.ii);
+      people[pi].items[ii].done=cb.checked;
+      saveBag(people); render();
+    });
+  });
+  // del item
+  document.querySelectorAll('[data-del-item]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const [pi,ii]=btn.dataset.delItem.split('-').map(Number);
+      people[pi].items.splice(ii,1); saveBag(people); render();
+    });
+  });
+  // add item
+  document.querySelectorAll('[data-add-btn]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const pi=parseInt(btn.dataset.addBtn);
+      const inp=document.querySelector(`[data-add-inp="${pi}"]`);
+      const text=(inp?.value||'').trim();
+      if(!text) return;
+      people[pi].items.push({id:uid(),text,done:false});
+      saveBag(people); inp.value=''; render();
+    });
+  });
+  document.querySelectorAll('[data-add-inp]').forEach(inp=>{
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){
+        const pi=parseInt(inp.dataset.addInp);
+        document.querySelector(`[data-add-btn="${pi}"]`)?.click();
+      }
+    });
+  });
+}
+
+
+/* ── TODO HELPERS ── */
+function todoKey(){ return 'TODO_'+(activePlan.code||''); }
+function loadTodo(){
+  try{ return JSON.parse(localStorage.getItem(todoKey())||'[]'); }catch(e){ return []; }
+}
+function saveTodo(data){ try{ localStorage.setItem(todoKey(),JSON.stringify(data)); }catch(e){} }
+
+function todoTabHTML(){
+  const people=loadTodo();
+  const addPersonRow=`<div class="todo-add-person-row">
+    <input class="todo-add-person-inp" id="todo-new-person" placeholder="新增負責人（例：李平烈、全員）" maxlength="20"/>
+    <button class="todo-add-person-btn" id="todo-add-person-btn">＋ 新增</button>
+  </div>`;
+  if(people.length===0){
+    return addPersonRow+`<div class="todo-empty">👆 先新增負責人，再建立各自的待辦清單</div>`;
+  }
+  const sections=people.map((person,pi)=>{
+    const done=person.items.filter(it=>it.done).length;
+    const total=person.items.length;
+    const progress=total>0?`${done}/${total} 已完成`:'';
+    const items=person.items.map((it,ii)=>`
+      <div class="todo-item">
+        <input type="checkbox" class="todo-check" data-pi="${pi}" data-ii="${ii}" ${it.done?'checked':''}>
+        <span class="todo-item-label ${it.done?'done':''}">${esc(it.text)}</span>
+        <button class="todo-del-item" data-todo-del-item="${pi}-${ii}">✕</button>
+      </div>`).join('');
+    return `<div class="todo-section">
+      <div class="todo-person-header">
+        <span class="todo-person-name">👤 ${esc(person.name)}</span>
+        <span class="todo-progress">${progress}</span>
+        <button class="todo-del-person" data-todo-del-person="${pi}" title="刪除此負責人">🗑</button>
+      </div>
+      <div class="todo-items">${items||'<div style="color:var(--ink3);font-size:13px;padding:8px 0">尚未新增待辦事項</div>'}</div>
+      <div class="todo-add-row">
+        <input class="todo-add-inp" data-todo-add-inp="${pi}" placeholder="新增待辦事項…" maxlength="40"/>
+        <button class="todo-add-btn" data-todo-add-btn="${pi}">新增</button>
+      </div>
+    </div>`;
+  }).join('');
+  return addPersonRow+sections;
+}
+
+function bindTodo(){
+  const people=loadTodo();
+  document.getElementById('todo-add-person-btn')?.addEventListener('click',()=>{
+    const inp=document.getElementById('todo-new-person');
+    const name=(inp?.value||'').trim();
+    if(!name) return;
+    people.push({name,items:[]});
+    saveTodo(people); render();
+  });
+  document.getElementById('todo-new-person')?.addEventListener('keydown',e=>{
+    if(e.key==='Enter') document.getElementById('todo-add-person-btn')?.click();
+  });
+  document.querySelectorAll('[data-todo-del-person]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const pi=parseInt(btn.dataset.todoDelPerson);
+      if(!confirm(`刪除「${people[pi]?.name}」的待辦清單？`)) return;
+      people.splice(pi,1); saveTodo(people); render();
+    });
+  });
+  document.querySelectorAll('.todo-check').forEach(cb=>{
+    cb.addEventListener('change',()=>{
+      const pi=parseInt(cb.dataset.pi), ii=parseInt(cb.dataset.ii);
+      people[pi].items[ii].done=cb.checked;
+      saveTodo(people); render();
+    });
+  });
+  document.querySelectorAll('[data-todo-del-item]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const [pi,ii]=btn.dataset.todoDelItem.split('-').map(Number);
+      people[pi].items.splice(ii,1); saveTodo(people); render();
+    });
+  });
+  document.querySelectorAll('[data-todo-add-btn]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const pi=parseInt(btn.dataset.todoAddBtn);
+      const inp=document.querySelector(`[data-todo-add-inp="${pi}"]`);
+      const text=(inp?.value||'').trim();
+      if(!text) return;
+      people[pi].items.push({id:uid(),text,done:false});
+      saveTodo(people); inp.value=''; render();
+    });
+  });
+  document.querySelectorAll('[data-todo-add-inp]').forEach(inp=>{
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){
+        const pi=parseInt(inp.dataset.todoAddInp);
+        document.querySelector(`[data-todo-add-btn="${pi}"]`)?.click();
+      }
+    });
+  });
 }
 
 function dayTabHTML(){
@@ -622,6 +866,10 @@ function bindView(){
     document.getElementById('btn-settings').onclick=()=>{ overlay='settings'; showOverlay(); };
     document.getElementById('tab-day').onclick=()=>{ tripTab='day'; render(); };
     document.getElementById('tab-ov').onclick=()=>{ tripTab='overview'; render(); };
+    document.getElementById('tab-bag').onclick=()=>{ tripTab='bag'; render(); };
+    document.getElementById('tab-todo').onclick=()=>{ tripTab='todo'; render(); };
+    if(tripTab==='bag'){ bindBag(); }
+    if(tripTab==='todo'){ bindTodo(); }
     if(tripTab==='day'){
       document.getElementById('day-prev')?.addEventListener('click',()=>{ if(currentDay>0){currentDay--;render();} });
       document.getElementById('day-next')?.addEventListener('click',()=>{ if(currentDay<activePlan.days.length-1){currentDay++;render();} });
