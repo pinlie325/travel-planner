@@ -589,7 +589,7 @@ function saveBag(data){ try{ localStorage.setItem(bagKey(),JSON.stringify(data))
 function bagTabHTML(){
   const people=loadBag(); // [{name, items:[{id,text,done}]}]
   const addPersonRow=`<div class="bag-add-person-row">
-    <input class="bag-add-person-inp" id="bag-new-person" placeholder="新增成員（例：媽媽包、李平烈）" maxlength="20"/>
+    <input class="bag-add-person-inp" id="bag-new-person" placeholder="輸入成員名稱" maxlength="20"/>
     <button class="bag-add-person-btn" id="bag-add-person-btn">＋ 新增</button>
   </div>`;
   if(people.length===0){
@@ -690,7 +690,7 @@ function saveTodo(data){ try{ localStorage.setItem(todoKey(),JSON.stringify(data
 function todoTabHTML(){
   const people=loadTodo();
   const addPersonRow=`<div class="todo-add-person-row">
-    <input class="todo-add-person-inp" id="todo-new-person" placeholder="新增負責人（例：李平烈、全員）" maxlength="20"/>
+    <input class="todo-add-person-inp" id="todo-new-person" placeholder="輸入負責人名稱" maxlength="20"/>
     <button class="todo-add-person-btn" id="todo-add-person-btn">＋ 新增</button>
   </div>`;
   if(people.length===0){
