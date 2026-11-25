@@ -83,7 +83,12 @@ input,textarea{font-family:inherit}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trip-card-meta{font-size:12px;color:var(--ink3);margin-top:3px;display:flex;gap:8px;align-items:center}
 .trip-card-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--ink3);flex-shrink:0}
-.trip-card-chevron{color:var(--ink3);font-size:14px;flex-shrink:0}
+.trip-card-chevron{
+  background:linear-gradient(135deg,var(--accent),var(--accent-d));
+  color:#fff;font-size:12px;font-weight:800;letter-spacing:.5px;
+  flex-shrink:0;border-radius:10px;padding:7px 11px;
+  display:flex;align-items:center;gap:3px;line-height:1
+}
 
 .empty-state{text-align:center;padding:60px 20px;color:var(--ink3)}
 .empty-state .icon{font-size:48px;margin-bottom:16px;opacity:.5}
@@ -535,7 +540,7 @@ function homeHTML(){
               <span>${t.days} 天行程</span>
             </div>
           </div>
-          <span class="trip-card-chevron">›</span>
+          <span class="trip-card-chevron">GO</span>
         </div>`;
       }).join('');
 
