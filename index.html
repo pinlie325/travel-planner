@@ -190,7 +190,7 @@ textarea.inp{resize:none;line-height:1.5}
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
   padding:14px 16px;margin-bottom:8px;box-shadow:var(--sh-sm);
   display:flex;gap:12px;align-items:flex-start;cursor:pointer;
-  transition:box-shadow .15s,opacity .15s
+  transition:box-shadow .15s,opacity .15s;position:relative
 }
 .spot-card:active{box-shadow:var(--sh)}
 .spot-icon{width:40px;height:40px;border-radius:12px;flex-shrink:0;
@@ -202,9 +202,15 @@ textarea.inp{resize:none;line-height:1.5}
   display:flex;align-items:center;gap:3px}
 .spot-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
 .spot-note{font-size:12px;color:var(--ink2);margin-top:5px;line-height:1.5}
-.spot-del-btn{width:28px;height:28px;border-radius:50%;background:transparent;
+.spot-map-btn{width:100%;margin-top:8px;padding:6px 0;border-radius:8px;
+  background:var(--accent-light,#eaf1ff);border:none;cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--accent);display:flex;align-items:center;
+  justify-content:center;gap:4px;opacity:.9}
+.spot-map-btn:active{opacity:1;background:var(--accent);color:#fff}
+.spot-del-btn{position:absolute;top:6px;right:6px;width:24px;height:24px;
+  border-radius:50%;background:transparent;border:none;
   display:flex;align-items:center;justify-content:center;
-  font-size:13px;color:var(--ink3);flex-shrink:0;align-self:center}
+  font-size:12px;color:var(--ink3);cursor:pointer;padding:0}
 .spot-del-btn:active{background:var(--red-light);color:var(--red)}
 
 .add-spot{
@@ -242,13 +248,16 @@ textarea.inp{resize:none;line-height:1.5}
 
 /* ── day nav ── */
 .day-nav{background:var(--surface);border-bottom:1px solid var(--line);
-  padding:0 16px;height:52px;display:flex;align-items:center;gap:8px}
-.day-nav-arrow{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:20px;background:var(--surface2);color:var(--ink2);flex-shrink:0;border:none;cursor:pointer}
-.day-nav-arrow:disabled{opacity:.3;cursor:default;transform:none}
-.day-nav-center{flex:1;text-align:center}
-.day-nav-label{font-size:15px;font-weight:800;color:var(--accent)}
-.day-nav-date{font-size:12px;color:var(--ink3);margin-top:1px}
+  padding:0 4px;height:56px;display:flex;align-items:stretch;gap:0}
+.day-nav-arrow{width:60px;display:flex;align-items:center;justify-content:center;
+  font-size:36px;line-height:1;background:none;border:none;cursor:pointer;
+  color:var(--accent);flex-shrink:0;transition:opacity .15s;padding:0}
+.day-nav-arrow:active{opacity:.5}
+.day-nav-arrow:disabled{opacity:.2;cursor:default}
+.day-nav-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.day-nav-label{font-size:20px;font-weight:900;color:var(--accent);letter-spacing:.5px;line-height:1.1}
+.day-nav-label span{font-size:11px;font-weight:500;color:var(--ink3);margin-left:4px}
+.day-nav-date{font-size:13px;font-weight:700;color:var(--accent);margin-top:2px;border:none;background:none;outline:none}
 .tab-bar{background:var(--surface);border-bottom:1px solid var(--line);display:flex;padding:0 16px}
 .tab-btn{flex:1;border:none;background:none;font-family:inherit;font-size:14px;font-weight:700;
   color:var(--ink3);padding:14px 0 12px;border-bottom:2px solid transparent;
@@ -559,7 +568,7 @@ function tripHTML(){
   const dayNav=`<div class="day-nav">
     <button class="day-nav-arrow" id="day-prev" ${currentDay===0?'disabled':''}>‹</button>
     <div class="day-nav-center">
-      <div class="day-nav-label">DAY ${currentDay+1}／${p.days.length}</div>
+      <div class="day-nav-label">DAY ${currentDay+1}<span>／共${p.days.length}天</span></div>
       ${dd?`<div class="day-nav-date">${dd}</div>`:''}
     </div>
     <button class="day-nav-arrow" id="day-next" ${currentDay===p.days.length-1?'disabled':''}>›</button>
@@ -818,8 +827,9 @@ function spotCardHTML(s,dayIdx){
         <span class="spot-tag" style="background:${cat.bg};color:${cat.color}">${cat.label}</span>
       </div>
       ${s.note?`<div class="spot-note">${esc(s.note)}</div>`:''}
+      <button class="spot-map-btn" data-name="${esc(s.name||'')}" data-addr="${esc(s.addr||'')}" data-phone="${esc(s.phone||'')}" title="開啟地圖">📍 在地圖上查看</button>
     </div>
-    <button class="spot-del-btn" data-sid="${esc(s.id)}" data-day="${dayIdx}">✕</button>
+    <button class="spot-del-btn" data-sid="${esc(s.id)}" data-day="${dayIdx}" title="長按刪除">✕</button>
   </div>`;
 }
 
@@ -875,10 +885,23 @@ function bindView(){
       document.getElementById('day-prev')?.addEventListener('click',()=>{ if(currentDay>0){currentDay--;render();} });
       document.getElementById('day-next')?.addEventListener('click',()=>{ if(currentDay<activePlan.days.length-1){currentDay++;render();} });
       document.getElementById('btn-add-spot')?.addEventListener('click',()=>{ overlay='spot-add'; overlayCtx={dayIdx:currentDay}; showOverlay(); });
+      // 左右滑動切換日期
+      const body=document.querySelector('.app-body');
+      if(body){
+        let tx=0;
+        body.addEventListener('touchstart',e=>{ tx=e.touches[0].clientX; },{passive:true});
+        body.addEventListener('touchend',e=>{
+          const dx=e.changedTouches[0].clientX-tx;
+          if(Math.abs(dx)<50) return;
+          if(dx<0&&currentDay<activePlan.days.length-1){currentDay++;render();}
+          else if(dx>0&&currentDay>0){currentDay--;render();}
+        },{passive:true});
+      }
     }
     document.querySelectorAll('.spot-card').forEach(el=>{
       el.onclick=e=>{
         if(e.target.classList.contains('spot-del-btn')||e.target.closest('.spot-del-btn')) return;
+        if(e.target.classList.contains('spot-map-btn')||e.target.closest('.spot-map-btn')) return;
         if(e.target.classList.contains('drag-handle')) return;
         const dayIdx=parseInt(el.dataset.day);
         const sid=el.dataset.sid;
@@ -886,13 +909,34 @@ function bindView(){
         overlay='spot-edit'; overlayCtx={dayIdx,sid,spot}; showOverlay();
       };
     });
-    document.querySelectorAll('.spot-del-btn').forEach(btn=>{
+    document.querySelectorAll('.spot-map-btn').forEach(btn=>{
       btn.onclick=e=>{ e.stopPropagation();
+        const addr=btn.dataset.addr;
+        const phone=btn.dataset.phone;
+        const name=btn.dataset.name;
+        const q=addr||phone||name;
+        if(!q) return toast('請先填寫景點名稱或地址');
+        window.open('https://www.google.com/maps/search/'+encodeURIComponent(q),'_blank');
+      };
+    });
+    document.querySelectorAll('.spot-del-btn').forEach(btn=>{
+      let holdTimer=null;
+      btn.addEventListener('touchstart',e=>{ e.stopPropagation();
+        holdTimer=setTimeout(()=>{
+          const dayIdx=parseInt(btn.dataset.day); const sid=btn.dataset.sid;
+          activePlan.days[dayIdx].spots=activePlan.days[dayIdx].spots.filter(s=>s.id!==sid);
+          toast('已刪除'); render(); apiSave(activePlan);
+        },600);
+      },{passive:true});
+      btn.addEventListener('touchend',e=>{ clearTimeout(holdTimer); },{passive:true});
+      btn.addEventListener('touchmove',e=>{ clearTimeout(holdTimer); },{passive:true});
+      // 電腦版保留 click+confirm
+      btn.addEventListener('click',e=>{ e.stopPropagation();
         const dayIdx=parseInt(btn.dataset.day); const sid=btn.dataset.sid;
         if(!confirm('刪除此景點？')) return;
         activePlan.days[dayIdx].spots=activePlan.days[dayIdx].spots.filter(s=>s.id!==sid);
         toast('已刪除'); render(); apiSave(activePlan);
-      };
+      });
     });
     /* ── drag-and-drop reorder ── */
     let dragSid=null;
@@ -996,8 +1040,12 @@ function spotSheetHTML(){
     </select></div>
   <div class="field"><label class="field-label">類型</label>
     <div class="cat-grid" id="cat-grid">${grid}</div></div>
+  <div class="field"><label class="field-label">地址（選填）</label>
+    <input class="inp" id="f-saddr" placeholder="輸入地址，點地圖按鈕時會更準確" value="${esc(s.addr||'')}"/></div>
+  <div class="field"><label class="field-label">電話（選填）</label>
+    <input class="inp" id="f-sphone" type="tel" placeholder="日本可用電話號碼搜地圖" value="${esc(s.phone||'')}"/></div>
   <div class="field"><label class="field-label">備註（選填）</label>
-    <textarea class="inp" id="f-snote" rows="2" placeholder="地址、預約資訊…">${esc(s.note||'')}</textarea></div>
+    <textarea class="inp" id="f-snote" rows="2" placeholder="預約資訊、班機號碼…">${esc(s.note||'')}</textarea></div>
   <button class="act-btn primary" id="do-spot">${editing?'儲存':'加入行程'}</button>
   ${editing?`<button class="act-btn danger" id="do-del-spot">刪除此景點</button>`:''}
   <button class="act-btn ghost" id="cancel-sheet">取消</button>`;
@@ -1161,14 +1209,16 @@ function bindOverlay(){
   document.getElementById('do-spot')?.addEventListener('click',()=>{
     const name=document.getElementById('f-sname').value.trim();
     const time=document.getElementById('f-stime').value.trim();
+    const addr=document.getElementById('f-saddr').value.trim();
+    const phone=document.getElementById('f-sphone').value.trim();
     const note=document.getElementById('f-snote').value.trim();
     if(!name){ toast('請填寫行程規劃名稱'); return; }
     const dayIdx=overlayCtx.dayIdx;
     if(overlay==='spot-edit'){
       const spot=activePlan.days[dayIdx].spots.find(s=>s.id===overlayCtx.sid);
-      Object.assign(spot,{name,time,note,cat:selCat});
+      Object.assign(spot,{name,time,addr,phone,note,cat:selCat});
     } else {
-      activePlan.days[dayIdx].spots.push({id:uid(),name,time,note,cat:selCat});
+      activePlan.days[dayIdx].spots.push({id:uid(),name,time,addr,phone,note,cat:selCat});
     }
     const _msg=overlay==='spot-edit'?'已更新':'已新增'; closeOverlay(); render(); toast(_msg); apiSave(activePlan);
   });
