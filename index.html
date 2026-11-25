@@ -827,7 +827,7 @@ function spotCardHTML(s,dayIdx){
         <span class="spot-tag" style="background:${cat.bg};color:${cat.color}">${cat.label}</span>
       </div>
       ${s.note?`<div class="spot-note">${esc(s.note)}</div>`:''}
-      <button class="spot-map-btn" data-name="${esc(s.name||'')}" data-addr="${esc(s.addr||'')}" data-phone="${esc(s.phone||'')}" title="開啟地圖">📍 在地圖上查看</button>
+      ${(s.addr||s.phone)?`<button class="spot-map-btn" data-name="${esc(s.name||'')}" data-addr="${esc(s.addr||'')}" data-phone="${esc(s.phone||'')}" title="開啟地圖">📍 在地圖上查看</button>`:''}
     </div>
     <button class="spot-del-btn" data-sid="${esc(s.id)}" data-day="${dayIdx}" title="長按刪除">✕</button>
   </div>`;
@@ -916,7 +916,10 @@ function bindView(){
         const name=btn.dataset.name;
         const q=addr||phone||name;
         if(!q) return toast('請先填寫景點名稱或地址');
-        window.open('https://www.google.com/maps/search/'+encodeURIComponent(q),'_blank');
+        const a=document.createElement('a');
+        a.href='https://www.google.com/maps/search/'+encodeURIComponent(q);
+        a.target='_blank'; a.rel='noreferrer noopener';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
       };
     });
     document.querySelectorAll('.spot-del-btn').forEach(btn=>{
