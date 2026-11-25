@@ -1128,6 +1128,18 @@ function bindOverlay(){
     toast('已下載 JSON 檔');
   });
 
+  // 匯入 — 選擇檔案
+  document.getElementById('import-file')?.addEventListener('change',e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      document.getElementById('import-json').value=ev.target.result;
+      document.getElementById('import-err').style.display='none';
+    };
+    reader.readAsText(file,'utf-8');
+    e.target.value=''; // 允許重複選同一檔案
+  });
+
   // 匯入
   document.getElementById('set-import-btn')?.addEventListener('click',()=>{
     const area=document.getElementById('import-area');
@@ -1289,7 +1301,11 @@ function settingsSheetHTML(){
       ③ 複製 AI 回覆的 JSON，貼到下面的框，按「確認匯入」
     </div>
     <button class="act-btn ghost" id="set-ai-copy" style="margin:0 0 10px">📋 複製給 AI 的指令</button>
-    <textarea class="inp" id="import-json" rows="5" placeholder='貼上 JSON 內容...' style="font-size:13px;font-family:monospace"></textarea>
+    <label class="act-btn ghost" style="margin:0 0 10px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer">
+      📂 選擇 JSON 檔案
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none">
+    </label>
+    <textarea class="inp" id="import-json" rows="5" placeholder='貼上 JSON 內容，或選擇上方的 JSON 檔案...' style="font-size:13px;font-family:monospace"></textarea>
     <div id="import-err" class="err-msg" style="display:none"></div>
     <button class="act-btn primary" id="set-import-do" style="margin-top:4px">確認匯入</button>
   </div>
