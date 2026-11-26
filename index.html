@@ -1227,6 +1227,10 @@ function spotSheetHTML(){
   </div>
   <div class="field"><label class="field-label">備註（選填）</label>
     <textarea class="inp" id="f-snote" rows="4" placeholder="預約資訊、班機號碼…">${esc(s.note||'')}</textarea></div>
+  ${editing?`<div class="field"><label class="field-label">移到第幾天</label>
+    <select class="inp sel" id="f-move-day">
+      ${activePlan.days.map((_,i)=>`<option value="${i}"${overlayCtx.dayIdx===i?' selected':''}>DAY ${i+1}${(()=>{const dd=dayDate(activePlan.startDate,i);return dd?' · '+dd.replace(/（.*）/,''):''})()}</option>`).join('')}
+    </select></div>`:''}
   <button class="act-btn primary" id="do-spot">${editing?'儲存':'加入行程'}</button>
   ${editing?`<button class="act-btn danger" id="do-del-spot">刪除此景點</button>`:''}
   <button class="act-btn ghost" id="cancel-sheet">取消</button>`;
@@ -1419,18 +1423,26 @@ function bindOverlay(){
     const dayIdx=overlayCtx.dayIdx;
     const checkoutOnly=selCat==='stay'&&(document.getElementById('f-checkout-only')?.checked||false);
     if(overlay==='spot-edit'){
+      const targetDay=parseInt(document.getElementById('f-move-day')?.value??dayIdx);
       const spot=activePlan.days[dayIdx].spots.find(s=>s.id===overlayCtx.sid);
       Object.assign(spot,{name,time,addr,phone,note,cat:selCat});
       if(stayDays) spot.stayDays=stayDays; else delete spot.stayDays;
-      delete spot.stayUntilDay; // 清舊格式
+      delete spot.stayUntilDay;
       spot.checkoutOnly=checkoutOnly;
+      if(targetDay!==dayIdx){
+        activePlan.days[dayIdx].spots=activePlan.days[dayIdx].spots.filter(s=>s.id!==overlayCtx.sid);
+        activePlan.days[targetDay].spots.push(spot);
+        currentDay=targetDay;
+      }
     } else {
       const newSpot={id:uid(),name,time,addr,phone,note,cat:selCat};
       if(stayDays) newSpot.stayDays=stayDays;
       if(checkoutOnly) newSpot.checkoutOnly=true;
       activePlan.days[dayIdx].spots.push(newSpot);
     }
-    const _msg=overlay==='spot-edit'?'已更新':'已新增'; closeOverlay(); render(); toast(_msg); apiSave(activePlan);
+    const _moved=overlay==='spot-edit'&&parseInt(document.getElementById('f-move-day')?.value??overlayCtx.dayIdx)!==overlayCtx.dayIdx;
+    const _msg=_moved?'已移動到 DAY '+(currentDay+1):overlay==='spot-edit'?'已更新':'已新增';
+    closeOverlay(); render(); toast(_msg); apiSave(activePlan);
   });
 
   /* delete from edit sheet */
