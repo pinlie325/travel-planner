@@ -234,6 +234,8 @@ textarea.inp{resize:none;line-height:1.5}
 .di-content{font-size:13px;line-height:1.6;color:#1c1917;flex:1;min-width:0;word-break:break-all}
 .di-range{font-size:12px;font-weight:800;color:#7c3aed;white-space:nowrap;background:#f5f3ff;border-radius:5px;padding:2px 7px}
 .field-hint{font-size:12px;color:var(--ink3);margin-top:5px}
+.checkout-only-label{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--ink2);cursor:pointer}
+.checkout-only-label input{width:16px;height:16px;cursor:pointer;accent-color:var(--accent)}
 .stay-range-row{display:flex;align-items:flex-end;gap:8px}
 .stay-range-col{flex:1;min-width:0}
 .stay-range-arrow{font-size:18px;color:var(--ink3);padding-bottom:10px;flex-shrink:0}
@@ -836,6 +838,7 @@ function dayTabHTML(){
   activePlan.days.forEach((d,di)=>{
     (d.spots||[]).forEach(s=>{
       if(s.cat!=='stay') return;
+      if(s.checkoutOnly) return; // 僅退房提醒，不列入當日重要資訊
       // 新格式：stayDays 陣列
       if(s.stayDays&&s.stayDays.includes(currentDay)){
         crossStay.push({...s,_fromDay:di});
@@ -1164,6 +1167,7 @@ function spotSheetHTML(){
       </div>
     </div>
     <div class="field-hint">住宿資訊會顯示在入住～退房每天底部</div>
+    <label class="checkout-only-label"><input type="checkbox" id="f-checkout-only" ${s.checkoutOnly?' checked':''}> 僅退房提醒（不列入當日重要資訊）</label>
   </div>
   <div class="field"><label class="field-label">備註（選填）</label>
     <textarea class="inp" id="f-snote" rows="4" placeholder="預約資訊、班機號碼…">${esc(s.note||'')}</textarea></div>
@@ -1357,14 +1361,17 @@ function bindOverlay(){
     }
     if(!name){ toast('請填寫行程規劃名稱'); return; }
     const dayIdx=overlayCtx.dayIdx;
+    const checkoutOnly=selCat==='stay'&&(document.getElementById('f-checkout-only')?.checked||false);
     if(overlay==='spot-edit'){
       const spot=activePlan.days[dayIdx].spots.find(s=>s.id===overlayCtx.sid);
       Object.assign(spot,{name,time,addr,phone,note,cat:selCat});
       if(stayDays) spot.stayDays=stayDays; else delete spot.stayDays;
       delete spot.stayUntilDay; // 清舊格式
+      spot.checkoutOnly=checkoutOnly;
     } else {
       const newSpot={id:uid(),name,time,addr,phone,note,cat:selCat};
       if(stayDays) newSpot.stayDays=stayDays;
+      if(checkoutOnly) newSpot.checkoutOnly=true;
       activePlan.days[dayIdx].spots.push(newSpot);
     }
     const _msg=overlay==='spot-edit'?'已更新':'已新增'; closeOverlay(); render(); toast(_msg); apiSave(activePlan);
