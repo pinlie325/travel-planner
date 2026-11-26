@@ -225,6 +225,24 @@ textarea.inp{resize:none;line-height:1.5}
   background:transparent;font-family:inherit
 }
 .add-spot:active{background:var(--surface2)}
+.day-info-box{margin-top:12px;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:var(--r);padding:14px 16px}
+.day-info-label{font-size:12px;font-weight:800;color:#92400e;margin-bottom:10px}
+.di-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #fde68a}
+.di-row:last-child{border-bottom:none;padding-bottom:0}
+.di-time{font-size:13px;font-weight:800;color:#1e40af;white-space:nowrap;min-width:40px}
+.di-icon{font-size:12px;font-weight:700;border-radius:6px;padding:2px 7px;white-space:nowrap}
+.di-content{font-size:13px;line-height:1.6;color:#1c1917;flex:1;min-width:0;word-break:break-all}
+.di-range{font-size:12px;font-weight:800;color:#7c3aed;white-space:nowrap;background:#f5f3ff;border-radius:5px;padding:2px 7px}
+.field-hint{font-size:12px;color:var(--ink3);margin-top:5px}
+.stay-range-row{display:flex;align-items:flex-end;gap:8px}
+.stay-range-col{flex:1;min-width:0}
+.stay-range-arrow{font-size:18px;color:var(--ink3);padding-bottom:10px;flex-shrink:0}
+.day-note-box{margin-top:12px;background:var(--surface);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh-sm)}
+.day-note-label{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px}
+.day-note-inp{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;
+  font-family:inherit;font-size:14px;line-height:1.6;color:var(--ink);background:var(--surface2);
+  resize:none;box-sizing:border-box;transition:border-color .15s}
+.day-note-inp:focus{outline:none;border-color:var(--accent);background:var(--surface)}
 
 /* ── modal ── */
 .modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;
@@ -812,7 +830,53 @@ function dayTabHTML(){
   const spots=day.spots.length===0
     ?`<div class="no-spot"><span class="ic">🌅</span>今天還沒有行程<br>點下方新增第一個</div>`
     :day.spots.map(s=>spotCardHTML(s,currentDay)).join('');
-  return spots+`<button class="add-spot" id="btn-add-spot">＋ 新增行程</button>`;
+  const dayNote=day.note||'';
+  // 自動摘要：住宿（含跨天）+ 票券預約
+  const crossStay=[];
+  activePlan.days.forEach((d,di)=>{
+    (d.spots||[]).forEach(s=>{
+      if(s.cat!=='stay') return;
+      // 新格式：stayDays 陣列
+      if(s.stayDays&&s.stayDays.includes(currentDay)){
+        crossStay.push({...s,_fromDay:di});
+      // 舊格式相容：stayUntilDay
+      } else if(!s.stayDays){
+        const until=s.stayUntilDay!=null?s.stayUntilDay:di;
+        if(di<=currentDay&&currentDay<=until) crossStay.push({...s,_fromDay:di});
+      }
+    });
+  });
+  const keySpots=[...crossStay,...(day.spots||[]).filter(s=>s.cat==='ticket')];
+  const keyHTML=keySpots.length===0?'':`
+<div class="day-info-box">
+  <div class="day-info-label">🔑 當日重要資訊</div>
+  ${keySpots.map(s=>{
+    const c=catOf(s.cat);
+    const lines=[];
+    if(s.cat==='stay'&&s.stayDays&&s.stayDays.length>1){
+      const mn=Math.min(...s.stayDays),mx=Math.max(...s.stayDays);
+      lines.push(`<span class="di-range">DAY${mn+1}～DAY${mx+1}</span>`);
+    } else if(s.cat==='stay'&&s.stayUntilDay!=null){
+      const from=s._fromDay!=null?s._fromDay:currentDay;
+      lines.push(`<span class="di-range">DAY${from+1}～DAY${s.stayUntilDay+1}</span>`);
+    } else if(s.time){
+      lines.push(`<span class="di-time">${esc(s.time)}</span>`);
+    }
+    lines.push(`<span class="di-icon" style="background:${c.bg};color:${c.color}">${c.icon} ${c.label}</span>`);
+    const parts=[];
+    if(s.name) parts.push(`<b>${esc(s.name)}</b>`);
+    if(s.addr) parts.push(`📍 ${esc(s.addr)}`);
+    if(s.phone) parts.push(`📞 ${esc(s.phone)}`);
+    if(s.note) parts.push(esc(s.note).replace(/\n/g,'<br>'));
+    return `<div class="di-row">${lines.join(' ')}<div class="di-content">${parts.join('<br>')}</div></div>`;
+  }).join('')}
+</div>`;
+  return spots+`<button class="add-spot" id="btn-add-spot">＋ 新增行程</button>
+${keyHTML}
+<div class="day-note-box">
+  <div class="day-note-label">📝 當日備註</div>
+  <textarea class="day-note-inp" id="day-note-inp" placeholder="補充說明、集合地點…" rows="3">${esc(dayNote)}</textarea>
+</div>`;
 }
 
 function overviewHTML(){
@@ -907,6 +971,10 @@ function bindView(){
       document.getElementById('day-prev')?.addEventListener('click',()=>{ if(currentDay>0){currentDay--;render();} });
       document.getElementById('day-next')?.addEventListener('click',()=>{ if(currentDay<activePlan.days.length-1){currentDay++;render();} });
       document.getElementById('btn-add-spot')?.addEventListener('click',()=>{ overlay='spot-add'; overlayCtx={dayIdx:currentDay}; showOverlay(); });
+      document.getElementById('day-note-inp')?.addEventListener('input',e=>{
+        activePlan.days[currentDay].note=e.target.value;
+        savePlan(activePlan);
+      });
       // 左右滑動切換日期
       const body=document.querySelector('.app-body');
       if(body){
@@ -1069,8 +1137,36 @@ function spotSheetHTML(){
     <input class="inp" id="f-saddr" placeholder="輸入地址，點地圖按鈕時會更準確" value="${esc(s.addr||'')}"/></div>
   <div class="field"><label class="field-label">電話（選填）</label>
     <input class="inp" id="f-sphone" type="tel" placeholder="日本可用電話號碼搜地圖" value="${esc(s.phone||'')}"/></div>
+  <div class="field stay-until-field" id="stay-until-wrap" style="display:${selCat==='stay'?'block':'none'}">
+    <div class="stay-range-row">
+      <div class="stay-range-col">
+        <label class="field-label">入住</label>
+        <select class="inp sel" id="f-stay-from">
+          ${activePlan.days.map((_,i)=>{
+            const dd=dayDate(activePlan.startDate,i);
+            const dateStr=dd?dd.replace(/（.*）/,''):'';
+            const fromDay=s.stayDays?Math.min(...s.stayDays):(overlayCtx.dayIdx||0);
+            return `<option value="${i}"${fromDay===i?' selected':''}>DAY ${i+1}${dateStr?' · '+dateStr:''}</option>`;
+          }).join('')}
+        </select>
+      </div>
+      <div class="stay-range-arrow">→</div>
+      <div class="stay-range-col">
+        <label class="field-label">退房</label>
+        <select class="inp sel" id="f-stay-to">
+          ${activePlan.days.map((_,i)=>{
+            const dd=dayDate(activePlan.startDate,i);
+            const dateStr=dd?dd.replace(/（.*）/,''):'';
+            const toDay=s.stayDays?Math.max(...s.stayDays):(overlayCtx.dayIdx||0);
+            return `<option value="${i}"${toDay===i?' selected':''}>DAY ${i+1}${dateStr?' · '+dateStr:''}</option>`;
+          }).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="field-hint">住宿資訊會顯示在入住～退房每天底部</div>
+  </div>
   <div class="field"><label class="field-label">備註（選填）</label>
-    <textarea class="inp" id="f-snote" rows="2" placeholder="預約資訊、班機號碼…">${esc(s.note||'')}</textarea></div>
+    <textarea class="inp" id="f-snote" rows="4" placeholder="預約資訊、班機號碼…">${esc(s.note||'')}</textarea></div>
   <button class="act-btn primary" id="do-spot">${editing?'儲存':'加入行程'}</button>
   ${editing?`<button class="act-btn danger" id="do-del-spot">刪除此景點</button>`:''}
   <button class="act-btn ghost" id="cancel-sheet">取消</button>`;
@@ -1239,6 +1335,8 @@ function bindOverlay(){
       selCat=btn.dataset.cat;
       document.querySelectorAll('#cat-grid .cat-btn').forEach(b=>b.classList.remove('on'));
       btn.classList.add('on');
+      const wrap=document.getElementById('stay-until-wrap');
+      if(wrap) wrap.style.display=selCat==='stay'?'block':'none';
     };
   });
 
@@ -1249,13 +1347,25 @@ function bindOverlay(){
     const addr=document.getElementById('f-saddr').value.trim();
     const phone=document.getElementById('f-sphone').value.trim();
     const note=document.getElementById('f-snote').value.trim();
+    // 入住～退房天數
+    let stayDays=undefined;
+    if(selCat==='stay'){
+      const from=parseInt(document.getElementById('f-stay-from')?.value||'0');
+      const to=parseInt(document.getElementById('f-stay-to')?.value||'0');
+      const mn=Math.min(from,to), mx=Math.max(from,to);
+      stayDays=Array.from({length:mx-mn+1},(_,i)=>mn+i);
+    }
     if(!name){ toast('請填寫行程規劃名稱'); return; }
     const dayIdx=overlayCtx.dayIdx;
     if(overlay==='spot-edit'){
       const spot=activePlan.days[dayIdx].spots.find(s=>s.id===overlayCtx.sid);
       Object.assign(spot,{name,time,addr,phone,note,cat:selCat});
+      if(stayDays) spot.stayDays=stayDays; else delete spot.stayDays;
+      delete spot.stayUntilDay; // 清舊格式
     } else {
-      activePlan.days[dayIdx].spots.push({id:uid(),name,time,addr,phone,note,cat:selCat});
+      const newSpot={id:uid(),name,time,addr,phone,note,cat:selCat};
+      if(stayDays) newSpot.stayDays=stayDays;
+      activePlan.days[dayIdx].spots.push(newSpot);
     }
     const _msg=overlay==='spot-edit'?'已更新':'已新增'; closeOverlay(); render(); toast(_msg); apiSave(activePlan);
   });
