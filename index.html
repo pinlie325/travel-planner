@@ -366,6 +366,23 @@ textarea.inp{resize:none;line-height:1.5}
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbwHUQw1fmW_mCXwMEe2tM8SolZMBz-mzZMHr1F4iCxk-zQ4qfVia_Dm0udE8oj02dj5XQ/exec';
 
+/* ── 版本更新檢查 ── */
+const APP_VERSION='2026-11-26-v1';
+(async()=>{
+  try{
+    const res=await fetch('https://pinlie325.github.io/travel-planner/version.txt?t='+Date.now(),{cache:'no-store'});
+    if(!res.ok)return;
+    const remote=(await res.text()).trim();
+    if(remote&&remote!==APP_VERSION){
+      const bar=document.createElement('div');
+      bar.id='update-bar';
+      bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#2563eb;color:#fff;text-align:center;padding:10px 14px;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px';
+      bar.innerHTML='🆕 有新版本！<button onclick="location.reload(true)" style="background:#fff;color:#2563eb;border:none;border-radius:8px;padding:5px 14px;font-weight:800;font-size:13px;cursor:pointer">立即更新</button><button onclick="document.getElementById(\'update-bar\').remove()" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer">稍後</button>';
+      document.body.prepend(bar);
+    }
+  }catch(e){}
+})();
+
 const CATS=[
   {id:'go',     label:'交通',   icon:'🚗',  bg:'#f0fdf4', color:'#15803d'},
   {id:'stay',   label:'住宿',   icon:'🏨', bg:'#eff6ff', color:'#1d4ed8'},
