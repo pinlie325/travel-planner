@@ -1385,82 +1385,111 @@ function exportPDF(){
 
   const dayCards=p.days.map((d,i)=>{
     const dd=dayDate(p.startDate,i);
-    const rows=(d.spots||[]).length===0
-      ?`<tr><td colspan="3" class="empty">尚無安排</td></tr>`
-      :[...d.spots].sort((a,b)=>(a.time||'99').localeCompare(b.time||'99')).map(s=>{
+    const spots=[...d.spots||[]].sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
+    const rows=spots.length===0
+      ?`<div class="empty-row">尚無安排</div>`
+      :spots.map(s=>{
         const c=catOf(s.cat);
-        return `<tr><td class="t">${esc(s.time||'—')}</td>
-          <td class="c"><span style="background:${c.bg};color:${c.color}">${c.icon} ${c.label}</span></td>
-          <td class="n">${esc(s.name||'（未命名）')}${s.note?`<div class="note">${esc(s.note).replace(/\n/g,'<br>')}</div>`:''}</td></tr>`;
+        return `<div class="spot-row">
+          <div class="spot-time">${esc(s.time||'—')}</div>
+          <div class="spot-info">
+            <div class="spot-cat"><span style="background:${c.bg};color:${c.color};-webkit-print-color-adjust:exact;print-color-adjust:exact">${c.icon} ${c.label}</span></div>
+            <div class="spot-name">${esc(s.name||'（未命名）')}</div>
+            ${s.note?`<div class="spot-note">${esc(s.note).replace(/\n/g,'<br>')}</div>`:''}
+          </div>
+        </div>`;
       }).join('');
-    return `<div class="day-card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <div class="day-title">DAY ${i+1}</div>
+    return `<div class="day-page">
+      <div class="day-header">
+        <div class="day-left">
+          <div class="day-num">DAY ${i+1}</div>
           ${dd?`<div class="day-date">${dd}</div>`:''}
         </div>
-        <div class="card-header-name">${esc(p.name)}</div>
+        <div class="day-trip-name">${esc(p.name)}</div>
       </div>
-      <table><thead><tr><th style="width:54px">時間</th><th style="width:90px">類型</th><th>行程 ／ 備註</th></tr></thead>
-      <tbody>${rows}</tbody></table>
+      <div class="spots">${rows}</div>
+      <div class="page-footer">一起GO・${esc(p.name)}・DAY ${i+1}</div>
     </div>`;
   }).join('');
 
   const html=`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=390,initial-scale=1">
 <title>${esc(p.name)}_行程表</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
-  background:#f0f4f8;color:#1e293b;padding:16px}
-.bar{background:#fff;border-radius:14px;padding:12px 16px;margin-bottom:12px;
-  display:flex;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
-.bar button{flex:1;padding:11px 0;border:none;border-radius:10px;font:inherit;
-  font-size:14px;font-weight:700;cursor:pointer}
-.bar .p{background:#2563eb;color:#fff}
-.bar .x{background:#f1f5f9;color:#334155}
-.top-bar{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,.07)}
-.top-bar h1{font-size:17px;font-weight:800}
-.top-meta{font-size:12px;color:#64748b;margin-top:4px}
-.day-card{background:#fff;border-radius:16px;margin-bottom:16px;
+  background:#f0f4f8;color:#1e293b}
+/* 螢幕上的提示列 */
+.bar{background:#fff;padding:10px 14px;display:flex;gap:8px;
+  position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.bar-hint{font-size:13px;color:#64748b;text-align:center;line-height:1.6}
+.bar-hint strong{color:#1e293b}
+.bar-buttons{display:flex;gap:8px}
+.bar button{flex:1;padding:13px 0;border:none;border-radius:10px;font:inherit;
+  font-size:15px;font-weight:700;cursor:pointer}
+.bar .p{background:#f1f5f9;color:#334155}
+.bar-buttons .x{background:#f1f5f9;color:#334155}
+.bar .ios{background:#f1f5f9;color:#334155}
+.ios-hint{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;
+  align-items:center;justify-content:center;padding:24px}
+.ios-hint-inner{background:#fff;border-radius:18px;padding:24px 20px;max-width:320px;width:100%}
+.ios-hint-title{font-size:17px;font-weight:800;margin-bottom:14px}
+.ios-hint-inner ol{padding-left:20px;line-height:2.2;font-size:15px}
+.ios-hint-inner button{margin-top:16px;width:100%;padding:13px;border:none;
+  border-radius:10px;background:#f1f5f9;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+/* 每天一張卡，螢幕上有間距 */
+.day-page{background:#fff;margin:12px 12px 0;border-radius:16px;
   overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.card-header{background:linear-gradient(135deg,#2563eb,#1d4ed8);
-  color:#fff;padding:16px 18px;-webkit-print-color-adjust:exact;print-color-adjust:exact;
-  display:flex;align-items:center;justify-content:space-between;gap:12px}
-.card-header-left{flex:1;min-width:0}
-.trip-name{font-size:13px;opacity:.8;margin-bottom:2px}
-.day-title{font-size:24px;font-weight:800}
-.day-date{font-size:13px;opacity:.8;margin-top:2px}
-.card-header-name{font-size:22px;font-weight:800;opacity:.75;text-align:right;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50%;letter-spacing:.5px}
-table{width:100%;border-collapse:collapse}
-th{background:#f8fafc;text-align:left;font-size:12px;color:#475569;
-  padding:8px 10px;border-bottom:2px solid #e2e8f0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-td{padding:10px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top;font-size:14px}
-td.t{font-weight:700;white-space:nowrap;color:#374151}
-td.c span{display:inline-block;border-radius:6px;padding:2px 7px;
-  font-size:12px;font-weight:700;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-td.n{font-weight:700}
-td.n .note{font-weight:400;font-size:12px;color:#64748b;margin-top:3px;line-height:1.5}
-td.empty{color:#94a3b8;text-align:center;padding:20px}
-.footer{text-align:center;color:#94a3b8;font-size:11px;padding:8px 0 20px}
+.day-page:last-of-type{margin-bottom:12px}
+/* 標題列 */
+.day-header{background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:#fff;padding:18px 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.day-left{flex:1}
+.day-num{font-size:28px;font-weight:800;line-height:1}
+.day-date{font-size:14px;opacity:.85;margin-top:4px}
+.day-trip-name{font-size:18px;font-weight:800;opacity:.7;text-align:right;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+/* 行程列 */
+.spots{padding:4px 0}
+.spot-row{display:flex;gap:0;padding:12px 14px;border-bottom:1px solid #f1f5f9;align-items:flex-start}
+.spot-time{font-size:16px;font-weight:800;color:#1e40af;white-space:nowrap;
+  min-width:52px;padding-top:2px}
+.spot-info{flex:1;min-width:0}
+.spot-cat span{display:inline-block;border-radius:6px;padding:3px 9px;
+  font-size:13px;font-weight:700;margin-bottom:4px}
+.spot-name{font-size:16px;font-weight:700;line-height:1.4}
+.spot-note{font-size:13px;color:#64748b;margin-top:4px;line-height:1.6}
+.empty-row{padding:20px 14px;color:#94a3b8;font-size:15px;text-align:center}
+.page-footer{text-align:center;color:#94a3b8;font-size:11px;padding:10px 0 14px}
+/* 列印：每天一頁，移除圓角陰影 */
 @media print{
-  .bar,.top-bar{display:none}
-  body{background:#fff;padding:8px}
-  .day-card{box-shadow:none;border:1px solid #e2e8f0;break-inside:avoid;page-break-inside:avoid}
+  .bar{display:none}
+  body{background:#fff}
+  .day-page{margin:0;border-radius:0;box-shadow:none;border:none;
+    page-break-after:always;break-after:page;
+    min-height:100vh;display:flex;flex-direction:column}
+  .spots{flex:1}
 }
 </style></head><body>
 <div class="bar">
-  <button class="p" onclick="window.print()">🖨️ 儲存為 PDF</button>
-  <button class="x" onclick="window.close()">✕ 關閉</button>
+  <button class="p" onclick="window.print()">🖨️ 儲存為 PDF（電腦）</button>
+  <button class="ios" onclick="document.getElementById('iosHint').style.display='flex'">📱 iPhone 存 PDF</button>
 </div>
-<div class="top-bar">
-  <h1>${esc(p.name)}</h1>
-  <div class="top-meta">📅 ${range}　🗓️ 共 ${p.days.length} 天・${total} 個行程${p.creator?`　👤 ${esc(p.creator)}`:''}</div>
+<div class="ios-hint" id="iosHint">
+  <div class="ios-hint-inner">
+    <div class="ios-hint-title">📱 iPhone 存 PDF 步驟</div>
+    <ol>
+      <li>點下方工具列的 <strong>分享</strong> 圖示 🔼</li>
+      <li>選 <strong>列印</strong></li>
+      <li>預覽畫面用兩指<strong>撐開</strong>，或點右上角縮圖</li>
+      <li>右上角 <strong>分享</strong> → <strong>儲存到檔案</strong></li>
+    </ol>
+    <button onclick="document.getElementById('iosHint').style.display='none'">✕ 關閉提示</button>
+  </div>
 </div>
 ${dayCards}
-<div class="footer">一起GO・${new Date().toLocaleDateString('zh-Hant')} 產生</div>
 </body></html>`;
 
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
