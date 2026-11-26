@@ -212,6 +212,8 @@ textarea.inp{resize:none;line-height:1.5}
   font-size:13px;font-weight:600;color:var(--accent);display:flex;align-items:center;
   justify-content:center;gap:4px;opacity:.9}
 .spot-map-btn:active{opacity:1;background:var(--accent);color:#fff}
+.spot-mapcode-btn{background:#f0fdf4;color:#15803d}
+.spot-mapcode-btn:active{background:#15803d;color:#fff}
 .spot-del-btn{position:absolute;top:6px;right:6px;width:24px;height:24px;
   border-radius:50%;background:transparent;border:none;
   display:flex;align-items:center;justify-content:center;
@@ -904,7 +906,7 @@ function dayTabHTML(){
     const parts=[];
     if(s.name) parts.push(`<b>${esc(s.name)}</b>`);
     if(s.addr) parts.push(`📍 ${esc(s.addr)}`);
-    if(s.phone) parts.push(`📞 ${esc(s.phone)}`);
+    if(s.phone){const isMap=/\d{3,}\*\d+/.test(s.phone);parts.push(`${isMap?'🗺️ Mapcode':'📞'} ${esc(s.phone)}`);}
     if(s.note) parts.push(esc(s.note).replace(/\n/g,'<br>'));
     return `<div class="di-row">${lines.join(' ')}<div class="di-content">${parts.join('<br>')}</div></div>`;
   }).join('')}
@@ -951,7 +953,8 @@ function spotCardHTML(s,dayIdx){
         <span class="spot-tag" style="background:${cat.bg};color:${cat.color}">${cat.label}</span>
       </div>
       ${s.note?`<div class="spot-note">${esc(s.note)}</div>`:''}
-      ${(s.addr||s.phone)?`<button class="spot-map-btn" data-name="${esc(s.name||'')}" data-addr="${esc(s.addr||'')}" data-phone="${esc(s.phone||'')}" title="開啟地圖">📍 在地圖上查看</button>`:''}
+      ${s.phone&&/\d[\d\s]*\*\d+/.test(s.phone)?`<button class="spot-map-btn spot-mapcode-btn" data-mapcode="${esc(s.phone)}" title="複製 Mapcode">🗺️ Mapcode：${esc(s.phone)}</button>`:''}
+      ${(s.addr||s.name)?`<button class="spot-map-btn" data-name="${esc(s.name||'')}" data-addr="${esc(s.addr||'')}" data-phone="${esc(s.phone||'')}" title="開啟地圖">📍 在地圖上查看</button>`:''}
     </div>
     <button class="spot-del-btn" data-sid="${esc(s.id)}" data-day="${dayIdx}" title="長按刪除">✕</button>
   </div>`;
@@ -1037,12 +1040,23 @@ function bindView(){
         overlay='spot-edit'; overlayCtx={dayIdx,sid,spot}; showOverlay();
       };
     });
-    document.querySelectorAll('.spot-map-btn').forEach(btn=>{
+    document.querySelectorAll('.spot-mapcode-btn').forEach(btn=>{
+      btn.onclick=e=>{ e.stopPropagation();
+        const code=btn.dataset.mapcode||'';
+        navigator.clipboard.writeText(code).then(()=>toast('✅ Mapcode 已複製：'+code)).catch(()=>{
+          const el=document.createElement('textarea');
+          el.value=code; document.body.appendChild(el); el.select();
+          document.execCommand('copy'); document.body.removeChild(el);
+          toast('✅ Mapcode 已複製：'+code);
+        });
+      };
+    });
+    document.querySelectorAll('.spot-map-btn:not(.spot-mapcode-btn)').forEach(btn=>{
       btn.onclick=e=>{ e.stopPropagation();
         const addr=btn.dataset.addr;
         const phone=btn.dataset.phone;
         const name=btn.dataset.name;
-        const q=addr||phone||name;
+        const q=addr||name;
         if(!q) return toast('請先填寫景點名稱或地址');
         const a=document.createElement('a');
         a.href='https://www.google.com/maps/search/'+encodeURIComponent(q);
@@ -1173,8 +1187,8 @@ function spotSheetHTML(){
     <div class="cat-grid" id="cat-grid">${grid}</div></div>
   <div class="field"><label class="field-label">地址（選填）</label>
     <input class="inp" id="f-saddr" placeholder="輸入地址，點地圖按鈕時會更準確" value="${esc(s.addr||'')}"/></div>
-  <div class="field"><label class="field-label">電話（選填）</label>
-    <input class="inp" id="f-sphone" type="tel" placeholder="日本可用電話號碼搜地圖" value="${esc(s.phone||'')}"/></div>
+  <div class="field"><label class="field-label">電話 / Mapcode（選填）</label>
+    <input class="inp" id="f-sphone" type="text" placeholder="電話號碼 或 Mapcode（如 13256615*58）" value="${esc(s.phone||'')}"/></div>
   <div class="field stay-until-field" id="stay-until-wrap" style="display:${selCat==='stay'?'block':'none'}">
     <div class="stay-range-row">
       <div class="stay-range-col">
