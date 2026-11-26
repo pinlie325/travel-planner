@@ -247,6 +247,8 @@ textarea.inp{resize:none;line-height:1.5}
   font-family:inherit;font-size:14px;line-height:1.6;color:var(--ink);background:var(--surface2);
   resize:none;box-sizing:border-box;transition:border-color .15s}
 .day-note-inp:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.day-note-save{margin-top:10px;width:100%;padding:10px;background:var(--accent);color:#fff;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background .15s}
+.day-note-save:active{background:var(--accent-d)}
 
 /* ── modal ── */
 .modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;
@@ -916,6 +918,7 @@ ${keyHTML}
 <div class="day-note-box">
   <div class="day-note-label">📝 當日備註</div>
   <textarea class="day-note-inp" id="day-note-inp" placeholder="補充說明、集合地點…" rows="3">${esc(dayNote)}</textarea>
+  <button class="day-note-save" id="btn-day-note-save">儲存備註</button>
 </div>`;
 }
 
@@ -1012,16 +1015,20 @@ function bindView(){
       document.getElementById('day-prev')?.addEventListener('click',()=>{ if(currentDay>0){currentDay--;render();} });
       document.getElementById('day-next')?.addEventListener('click',()=>{ if(currentDay<activePlan.days.length-1){currentDay++;render();} });
       document.getElementById('btn-add-spot')?.addEventListener('click',()=>{ overlay='spot-add'; overlayCtx={dayIdx:currentDay}; showOverlay(); });
-      document.getElementById('day-note-inp')?.addEventListener('input',e=>{
-        activePlan.days[currentDay].note=e.target.value;
+      document.getElementById('btn-day-note-save')?.addEventListener('click',()=>{
+        const val=document.getElementById('day-note-inp')?.value||'';
+        activePlan.days[currentDay].note=val;
         savePlan(activePlan);
+        document.getElementById('day-note-inp')?.blur();
+        toast('✅ 備註已儲存');
       });
       // 左右滑動切換日期
       const body=document.querySelector('.app-body');
       if(body){
         let tx=0;
-        body.addEventListener('touchstart',e=>{ tx=e.touches[0].clientX; },{passive:true});
+        body.addEventListener('touchstart',e=>{ if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return; tx=e.touches[0].clientX; },{passive:true});
         body.addEventListener('touchend',e=>{
+          if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
           const dx=e.changedTouches[0].clientX-tx;
           if(Math.abs(dx)<50) return;
           if(dx<0&&currentDay<activePlan.days.length-1){currentDay++;render();}
