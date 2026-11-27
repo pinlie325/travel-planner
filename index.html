@@ -378,8 +378,11 @@ textarea.inp{resize:none;line-height:1.5}
 .admin-trip-meta b{color:var(--ink);font-weight:700}
 .admin-trip-meta .unk{color:var(--ink3);font-style:italic}
 .topbar-right{display:flex;align-items:center;gap:4px}
-.topbar-refresh{background:none;border:none;font-size:18px;cursor:pointer;padding:6px;line-height:1;border-radius:8px;transition:transform .3s}
+.topbar-refresh{background:none;border:none;font-size:18px;cursor:pointer;padding:6px;line-height:1;border-radius:8px;transition:transform .3s;display:inline-flex;align-items:center;justify-content:center}
 .topbar-refresh:active{transform:rotate(180deg)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+.topbar-refresh.spinning{animation:spin .6s linear infinite;pointer-events:none}
 .admin-link{background:none;border:none;color:var(--ink3);font-size:12px;font-weight:700;
   cursor:pointer;font-family:inherit;padding:6px 4px}
 .topbar{justify-content:space-between}
@@ -480,6 +483,15 @@ async function apiDelete(c,pin){
 }
 
 /* ─── poll ─── */
+function showUpdateBanner(freshData){
+  if(document.getElementById('update-banner')) return;
+  const bar=document.createElement('div');
+  bar.id='update-banner';
+  bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9997;background:#2563eb;color:#fff;text-align:center;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;animation:slideDown .3s ease';
+  bar.innerHTML='🔔 行程已更新，點此載入最新內容';
+  bar.onclick=()=>{ activePlan=freshData; bar.remove(); render(); };
+  document.body.prepend(bar);
+}
 function startPoll(){
   stopPoll();
   pollingTimer=setInterval(async()=>{
@@ -488,7 +500,7 @@ function startPoll(){
     const c=activePlan.code.replace('PLAN_','');
     const fresh=await apiLoad(c).catch(()=>null);
     if(!fresh) return;
-    if(JSON.stringify(activePlan)!==JSON.stringify(fresh)){ activePlan=fresh; render(); }
+    if(JSON.stringify(activePlan)!==JSON.stringify(fresh)){ showUpdateBanner(fresh); }
   },15000);
 }
 function stopPoll(){ clearInterval(pollingTimer); }
@@ -594,7 +606,7 @@ function homeHTML(){
   <div class="topbar">
     <div class="topbar-logo">一起<span>GO</span></div>
     <div class="topbar-right">
-      <button class="topbar-refresh" id="btn-refresh" onclick="location.reload()" title="重新整理">🔄</button>
+      <button class="topbar-refresh" id="btn-refresh" onclick="this.classList.add('spinning');setTimeout(()=>location.reload(),400)" title="重新整理">🔄</button>
       <button class="admin-link" id="btn-admin-login">管理</button>
     </div>
   </div>
@@ -999,9 +1011,10 @@ function bindView(){
       const body=document.querySelector('.app-body');
       if(body){
         let tx=0;
-        body.addEventListener('touchstart',e=>{ if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return; tx=e.touches[0].clientX; },{passive:true});
+        body.addEventListener('touchstart',e=>{ if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return; if(window._touchDragging) return; tx=e.touches[0].clientX; },{passive:true});
         body.addEventListener('touchend',e=>{
           if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
+          if(window._touchDragging) return;
           const dx=e.changedTouches[0].clientX-tx;
           if(Math.abs(dx)<50) return;
           if(dx<0&&currentDay<activePlan.days.length-1){currentDay++;render();}
@@ -1105,6 +1118,7 @@ function bindView(){
           activated=false;
           holdTimer=setTimeout(()=>{
             activated=true;
+            window._touchDragging=true;
             draggingEl=card;
             draggingSid=card.dataset.sid;
             draggingDay=parseInt(card.dataset.day);
@@ -1153,9 +1167,11 @@ function bindView(){
             }
           }
           draggingEl=null; draggingSid=null; draggingDay=null;
+          setTimeout(()=>{ window._touchDragging=false; },50);
         },{passive:true});
         handle.addEventListener('touchcancel',()=>{
           clearTimeout(holdTimer); activated=false;
+          window._touchDragging=false;
           if(ghost){ghost.remove();ghost=null;}
           if(draggingEl){draggingEl.style.opacity='';draggingEl=null;}
           document.querySelectorAll('.spot-card').forEach(c=>c.classList.remove('drag-over'));
