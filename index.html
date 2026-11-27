@@ -208,11 +208,16 @@ textarea.inp{resize:none;line-height:1.5}
   display:flex;align-items:center;gap:3px}
 .spot-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
 .spot-note{font-size:12px;color:var(--ink2);margin-top:5px;line-height:1.5}
-.spot-map-btn{width:100%;margin-top:8px;padding:6px 0;border-radius:8px;
+.spot-map-row{display:flex;gap:6px;margin-top:8px}
+.spot-map-btn{flex:1;padding:6px 0;border-radius:8px;
   background:var(--accent-light,#eaf1ff);border:none;cursor:pointer;
-  font-size:13px;font-weight:600;color:var(--accent);display:flex;align-items:center;
-  justify-content:center;gap:4px;opacity:.9}
+  font-size:12px;font-weight:600;color:var(--accent);display:flex;align-items:center;
+  justify-content:center;gap:3px;opacity:.9}
 .spot-map-btn:active{opacity:1;background:var(--accent);color:#fff}
+.spot-map-apple{background:#f0f5ff;color:#1d4ed8}
+.spot-map-apple:active{background:#1d4ed8;color:#fff}
+.spot-map-google{background:#fff3f0;color:#c2410c}
+.spot-map-google:active{background:#c2410c;color:#fff}
 .spot-mapcode-btn{background:#f0fdf4;color:#15803d}
 .spot-mapcode-btn:active{background:#15803d;color:#fff}
 .spot-del-btn{position:absolute;top:6px;right:6px;width:24px;height:24px;
@@ -942,7 +947,10 @@ function spotCardHTML(s,dayIdx){
       </div>
       ${s.note?`<div class="spot-note">${esc(s.note)}</div>`:''}
       ${s.phone&&/\d[\d\s]*\*\d+/.test(s.phone)?`<button class="spot-map-btn spot-mapcode-btn" data-mapcode="${esc(s.phone)}" title="複製 Mapcode">🗺️ Mapcode：${esc(s.phone)}</button>`:''}
-      ${s.addr?`<button class="spot-map-btn" data-name="${esc(s.name||'')}" data-addr="${esc(s.addr||'')}" title="開啟地圖">📍 在地圖上查看</button>`:''}
+      ${(s.addr||s.latlng)?`<div class="spot-map-row">
+        ${s.latlng?`<button class="spot-map-btn spot-map-apple" data-latlng="${esc(s.latlng||'')}" data-name="${esc(s.name||'')}" title="Apple 地圖">🍎 Apple 地圖</button>`:''}
+        <button class="spot-map-btn spot-map-google" data-name="${esc(s.name||'')}" data-addr="${esc(s.addr||'')}" data-latlng="${esc(s.latlng||'')}" title="Google 地圖">📍 Google 地圖</button>
+      </div>`:''}
     </div>
     <button class="spot-del-btn" data-sid="${esc(s.id)}" data-day="${dayIdx}" title="長按刪除">✕</button>
   </div>`;
@@ -1025,7 +1033,7 @@ function bindView(){
     document.querySelectorAll('.spot-card').forEach(el=>{
       el.onclick=e=>{
         if(e.target.classList.contains('spot-del-btn')||e.target.closest('.spot-del-btn')) return;
-        if(e.target.classList.contains('spot-map-btn')||e.target.closest('.spot-map-btn')) return;
+        if(e.target.classList.contains('spot-map-btn')||e.target.closest('.spot-map-btn')||e.target.closest('.spot-map-row')) return;
         if(e.target.classList.contains('drag-handle')) return;
         const dayIdx=parseInt(el.dataset.day);
         const sid=el.dataset.sid;
@@ -1044,12 +1052,21 @@ function bindView(){
         });
       };
     });
-    document.querySelectorAll('.spot-map-btn:not(.spot-mapcode-btn)').forEach(btn=>{
+    document.querySelectorAll('.spot-map-apple').forEach(btn=>{
       btn.onclick=e=>{ e.stopPropagation();
-        const q=btn.dataset.addr||btn.dataset.name;
-        if(!q) return toast('請先填寫景點名稱或地址');
+        const ll=btn.dataset.latlng; const name=btn.dataset.name;
         const a=document.createElement('a');
-        a.href='https://www.google.com/maps/search/'+encodeURIComponent(q);
+        a.href='https://maps.apple.com/?ll='+encodeURIComponent(ll)+'&q='+encodeURIComponent(name||'');
+        a.target='_blank'; a.rel='noreferrer noopener';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      };
+    });
+    document.querySelectorAll('.spot-map-google').forEach(btn=>{
+      btn.onclick=e=>{ e.stopPropagation();
+        const ll=btn.dataset.latlng; const q=btn.dataset.addr||btn.dataset.name;
+        const a=document.createElement('a');
+        a.href=ll?'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(ll)
+                 :'https://www.google.com/maps/search/'+encodeURIComponent(q);
         a.target='_blank'; a.rel='noreferrer noopener';
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
       };
@@ -1248,6 +1265,8 @@ function spotSheetHTML(){
     <div class="cat-grid" id="cat-grid">${grid}</div></div>
   <div class="field"><label class="field-label">地址（選填）</label>
     <input class="inp" id="f-saddr" placeholder="輸入地址，點地圖按鈕時會更準確" value="${esc(s.addr||'')}"/></div>
+  <div class="field"><label class="field-label">經緯度（選填）</label>
+    <input class="inp" id="f-slatlng" placeholder="如：33.5970, 130.4490（Google Maps 右鍵可複製）" value="${esc(s.latlng||'')}"/></div>
   <div class="field"><label class="field-label">電話 / Mapcode（選填）</label>
     <input class="inp" id="f-sphone" type="text" placeholder="電話號碼 或 Mapcode（如 13256615*58）" value="${esc(s.phone||'')}"/></div>
   <div class="field stay-until-field" id="stay-until-wrap" style="display:${selCat==='stay'?'block':'none'}">
@@ -1463,6 +1482,7 @@ function bindOverlay(){
     const name=document.getElementById('f-sname').value.trim();
     const time=document.getElementById('f-stime').value.trim();
     const addr=document.getElementById('f-saddr').value.trim();
+    const latlng=document.getElementById('f-slatlng').value.trim();
     const phone=document.getElementById('f-sphone').value.trim();
     const note=document.getElementById('f-snote').value.trim();
     // 入住～退房天數
@@ -1479,7 +1499,7 @@ function bindOverlay(){
     if(overlay==='spot-edit'){
       const targetDay=parseInt(document.getElementById('f-move-day')?.value??dayIdx);
       const spot=activePlan.days[dayIdx].spots.find(s=>s.id===overlayCtx.sid);
-      Object.assign(spot,{name,time,addr,phone,note,cat:selCat});
+      Object.assign(spot,{name,time,addr,latlng,phone,note,cat:selCat});
       if(stayDays) spot.stayDays=stayDays; else delete spot.stayDays;
       delete spot.stayUntilDay;
       spot.checkoutOnly=checkoutOnly;
@@ -1489,7 +1509,7 @@ function bindOverlay(){
         currentDay=targetDay;
       }
     } else {
-      const newSpot={id:uid(),name,time,addr,phone,note,cat:selCat};
+      const newSpot={id:uid(),name,time,addr,latlng,phone,note,cat:selCat};
       if(stayDays) newSpot.stayDays=stayDays;
       if(checkoutOnly) newSpot.checkoutOnly=true;
       activePlan.days[dayIdx].spots.push(newSpot);
