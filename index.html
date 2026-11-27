@@ -1062,7 +1062,7 @@ function bindView(){
         toast('已刪除'); render(); apiSave(activePlan);
       });
     });
-    /* ── drag-and-drop reorder ── */
+    /* ── drag-and-drop reorder (desktop) ── */
     let dragSid=null;
     document.querySelectorAll('.spot-card').forEach(el=>{
       el.addEventListener('dragstart',e=>{
@@ -1093,6 +1093,74 @@ function bindView(){
         render(); apiSave(activePlan);
       });
     });
+    /* ── touch long-press drag reorder (mobile) ── */
+    (()=>{
+      let ghost=null, draggingEl=null, draggingSid=null, draggingDay=null;
+      let holdTimer=null, activated=false;
+      document.querySelectorAll('.drag-handle').forEach(handle=>{
+        const card=handle.closest('.spot-card');
+        handle.addEventListener('touchstart',e=>{
+          e.stopPropagation();
+          activated=false;
+          holdTimer=setTimeout(()=>{
+            activated=true;
+            draggingEl=card;
+            draggingSid=card.dataset.sid;
+            draggingDay=parseInt(card.dataset.day);
+            // 建立幽靈卡片
+            ghost=card.cloneNode(true);
+            ghost.style.cssText=`position:fixed;z-index:9999;width:${card.offsetWidth}px;opacity:.85;pointer-events:none;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:scale(1.03);transition:none;left:${card.getBoundingClientRect().left}px;top:${card.getBoundingClientRect().top}px`;
+            document.body.appendChild(ghost);
+            card.style.opacity='0.3';
+            navigator.vibrate&&navigator.vibrate(40);
+          },500);
+        },{passive:true});
+        handle.addEventListener('touchmove',e=>{
+          if(!activated){clearTimeout(holdTimer);return;}
+          e.preventDefault();
+          const t=e.touches[0];
+          ghost.style.left=(t.clientX-ghost.offsetWidth/2)+'px';
+          ghost.style.top=(t.clientY-ghost.offsetHeight/2)+'px';
+          // 找到目前手指下方的卡片
+          ghost.style.display='none';
+          const below=document.elementFromPoint(t.clientX,t.clientY);
+          ghost.style.display='';
+          const targetCard=below&&below.closest('.spot-card');
+          document.querySelectorAll('.spot-card').forEach(c=>c.classList.remove('drag-over'));
+          if(targetCard&&targetCard!==draggingEl&&parseInt(targetCard.dataset.day)===draggingDay){
+            targetCard.classList.add('drag-over');
+          }
+        },{passive:false});
+        handle.addEventListener('touchend',e=>{
+          clearTimeout(holdTimer);
+          if(!activated){activated=false;return;}
+          activated=false;
+          if(ghost){ghost.remove();ghost=null;}
+          if(draggingEl) draggingEl.style.opacity='';
+          // 找 drag-over 目標
+          const target=document.querySelector('.spot-card.drag-over');
+          document.querySelectorAll('.spot-card').forEach(c=>c.classList.remove('drag-over'));
+          if(target&&target!==draggingEl){
+            const toSid=target.dataset.sid;
+            const spots=activePlan.days[draggingDay].spots;
+            const fromIdx=spots.findIndex(s=>s.id===draggingSid);
+            const toIdx=spots.findIndex(s=>s.id===toSid);
+            if(fromIdx>=0&&toIdx>=0){
+              const [moved]=spots.splice(fromIdx,1);
+              spots.splice(toIdx,0,moved);
+              render(); apiSave(activePlan);
+            }
+          }
+          draggingEl=null; draggingSid=null; draggingDay=null;
+        },{passive:true});
+        handle.addEventListener('touchcancel',()=>{
+          clearTimeout(holdTimer); activated=false;
+          if(ghost){ghost.remove();ghost=null;}
+          if(draggingEl){draggingEl.style.opacity='';draggingEl=null;}
+          document.querySelectorAll('.spot-card').forEach(c=>c.classList.remove('drag-over'));
+        },{passive:true});
+      });
+    })();
   }
 }
 
