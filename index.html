@@ -942,7 +942,7 @@ function spotCardHTML(s,dayIdx){
       </div>
       ${s.note?`<div class="spot-note">${esc(s.note)}</div>`:''}
       ${s.phone&&/\d[\d\s]*\*\d+/.test(s.phone)?`<button class="spot-map-btn spot-mapcode-btn" data-mapcode="${esc(s.phone)}" title="複製 Mapcode">🗺️ Mapcode：${esc(s.phone)}</button>`:''}
-      ${s.addr?`<button class="spot-map-btn" data-name="${esc(s.name||'')}" data-addr="${esc(s.addr||'')}" data-phone="${esc(s.phone||'')}" title="開啟地圖">📍 在地圖上查看</button>`:''}
+      ${s.addr?`<button class="spot-map-btn" data-name="${esc(s.name||'')}" data-addr="${esc(s.addr||'')}" title="開啟地圖">📍 在地圖上查看</button>`:''}
     </div>
     <button class="spot-del-btn" data-sid="${esc(s.id)}" data-day="${dayIdx}" title="長按刪除">✕</button>
   </div>`;
@@ -1046,10 +1046,7 @@ function bindView(){
     });
     document.querySelectorAll('.spot-map-btn:not(.spot-mapcode-btn)').forEach(btn=>{
       btn.onclick=e=>{ e.stopPropagation();
-        const addr=btn.dataset.addr;
-        const phone=btn.dataset.phone;
-        const name=btn.dataset.name;
-        const q=addr||name;
+        const q=btn.dataset.addr||btn.dataset.name;
         if(!q) return toast('請先填寫景點名稱或地址');
         const a=document.createElement('a');
         a.href='https://www.google.com/maps/search/'+encodeURIComponent(q);
