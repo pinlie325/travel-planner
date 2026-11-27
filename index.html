@@ -1298,8 +1298,8 @@ function spotSheetHTML(){
     <div class="field-hint">住宿資訊會顯示在入住～退房每天底部</div>
     <label class="checkout-only-label"><input type="checkbox" id="f-checkout-only" ${s.checkoutOnly?' checked':''}> 僅退房提醒（不列入當日重要資訊）</label>
   </div>
-  <div class="field"><label class="field-label">備註（選填）</label>
-    <textarea class="inp" id="f-snote" rows="4" placeholder="預約資訊、班機號碼…">${esc(s.note||'')}</textarea></div>
+  <div class="field" style="margin-top:16px;margin-bottom:16px"><label class="field-label">備註（選填）</label>
+    <textarea class="inp" id="f-snote" rows="5" placeholder="預約資訊、班機號碼…">${esc(s.note||'')}</textarea></div>
   ${editing?`<div class="field"><label class="field-label">移到第幾天</label>
     <select class="inp sel" id="f-move-day">
       ${activePlan.days.map((_,i)=>`<option value="${i}"${overlayCtx.dayIdx===i?' selected':''}>DAY ${i+1}${(()=>{const dd=dayDate(activePlan.startDate,i);return dd?' · '+dd.replace(/（.*）/,''):''})()}</option>`).join('')}
